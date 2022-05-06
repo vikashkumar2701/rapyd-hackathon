@@ -1,0 +1,62 @@
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html, body {
+    min-height: 100%;
+    height: 100%;
+    margin: 0;
+}
+
+html, body, input, button {
+    font-family: sans-serif;
+}
+
+.container {
+    max-width: 800px;
+    width: 100%;
+    padding: 8px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#form {
+    display: flex;
+    flex-direction: column;
+}
+
+label {
+    padding: 0 8px;
+    font-size: 12px;
+}
+
+input {
+    padding: 8px;
+    margin: 4px 8px 8px 8px !important;
+}
+
+#pay-button {
+    appearance: none;
+    background-color: #EC4899;
+    color: white;
+    border: none;
+    padding: 16px 8px;
+}
+
+.purchase-image {
+    max-width: 100%;
+    margin: 16px auto;
+}
+
+.image-container {
+    justify-content: center;
+    display: flex;
+}
+
+@media only screen and (min-width: 600px) {
+    .purchase-image {
+        max-width: 480px;
+    }
+}

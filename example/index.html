@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Checkout Example</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" integrity="sha512-KfkfwYDsLkIlwQp6LFnl8zNdLGxu9YAA1QvwINks4PhcElQSvqcyVLLD9aMhXd13uQjoXtEKNosOWaZqXgel0g==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <link rel="stylesheet" href="index.css">
+</head>
+<body>
+    <div class="container">
+       <h2>Paying USD 5</h2>
+        <form id="form">
+            <label for="name-input">Name</label>
+            <input type="text" name="name" id="name-input" value="abc" placeholder="Enter your name" required />
+            <label for="email-address">Email</label>
+            <input name="email" id="email-address" type="email" value="abc@gmail.com" required placeholder="Enter your email" />
+            <span class="flex-fill"></span>
+            <button type="submit" id="pay-button">Pay</button>
+        </form>
+    </div>
+    <div id="rapyd-checkout"></div>
+    <script type="text/javascript" src="../checkout.js"></script>
+    <script src="https://sandboxcheckouttoolkit.rapyd.net"></script>
+
+    <script>
+        document.getElementById('form').onsubmit = (e) => {
+            e.preventDefault();
+            const form = document.getElementById('form');
+            if (form.checkValidity()) {
+                var mockpay = new MockPay({
+                    onFailure: (data) => {
+                        alert('Transaction Failed');
+                    },
+                    onSuccess: (data) => {
+
+                        alert('Transaction Success');
+                    },
+                    keyId: 'mockpay_o35lKNXgA3s5',
+                    amount: 100,
+                    customer: {
+                        name: form.children[1].value,
+                        email: form.children[3].value,
+                    },
+                    themeColor: '#EC4899f'
+                });
+                mockpay.open();
+            }
+        }
+    </script>
+
+    <script>
+        let checkout = new RapydCheckoutToolkit({
+    pay_button_text: "Click to pay",
+          // Text that appears on the 'Pay' button. 
+          // String. Maximum length is 16 characters.
+          // Default is "Place Your Order". Optional. 
+    pay_button_color: "blue",
+          // Color of the 'Pay' button. String.
+          // Standard CSS color name or hexadecimal code such as #323fff.
+          // Default is the color that is returned in the 'merchant_color'
+          // field of the response to 'Create Checkout Page'. Optional.
+    id: "checkout_611dbfc0597a4cd0660d6d88a3b6a174",
+          // ID of the 'Create Checkout Page' response. String. Required.
+    close_on_complete: false,
+          // Causes the embedded Rapyd Checkout Toolkit window to close
+          // when the payment is complete. Boolean. Default is 'true'. Optional.           
+    page_type: "collection"
+         // Default is "collection". Optional.
+});
+    </script>
+</body>
+</html>
