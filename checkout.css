@@ -5,10 +5,15 @@
 }
 
 .overlay button {
+   
+}
+#absbtn {
     font-family: 'Poppins', sans-serif !important;
     width: 100%;
-    position: absolute;
+    
     bottom: 0px;
+
+    position: absolute;
 }
 
 .overlay input {
@@ -71,6 +76,7 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    backdrop-filter: blur(37px);
 }
 
 .payment-card-header {
@@ -385,3 +391,245 @@ margin:8px;
            /* box-shadow: rgba(255, 255, 255, 0.2) 0px 0px 0px 1px inset, rgba(0, 0, 0, 0.9) 0px 0px 0px 1px; */
            
         }
+        .otp-container{
+
+            margin:0px !important;
+            padding: 0px !important;;
+
+
+        }
+        .otp-container{
+            width: 100%;
+            overflow: hidden;
+            margin: 10px;
+            text-align: center;
+        }
+
+        .otp-area{
+
+            display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin: 30px;
+        }
+
+        .otp-area input{
+           
+            box-shadow: rgba(0, 0, 0, 0.1) 0px 0px 5px 0px, rgba(0, 0, 0, 0.1) 0px 0px 1px 0px;
+        }
+
+        .otp-area input:focus{
+            box-shadow: rgba(3, 102, 214, 0.3) 0px 0px 0px 3px;
+        }
+/* CSS */
+.otp-area button#primary{
+  background-color: #0a6bff;
+  border-radius: 4px;
+  border: 0;
+  box-shadow: rgba(1,60,136,.5) 0 -1px 3px 0 inset,rgba(0,44,97,.1) 0 3px 6px 0;
+  
+  color: #fff;
+  cursor: pointer;
+ 
+  font-family: "Space Grotesk",-apple-system,system-ui,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 10px;
+  margin: 0;
+  margin-bottom:15px;
+  
+  width:100%;
+  padding: 10px 10px;
+ 
+  text-align: center;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  vertical-align: baseline;
+  transition: all .2s cubic-bezier(.22, .61, .36, 1);
+}
+
+.otp-area button#primary:hover {
+  background-color: #065dd8;
+  transform: translateY(-2px);
+}
+
+@media (min-width: 768px) {
+  .otp-area button {
+    padding: 10px 10px;
+    width:100%;
+  }
+}
+
+
+.button-8 {
+    margin:3px;
+  align-items: center;
+  appearance: none;
+  background-color: #fff;
+  border: 1px solid #dbdbdb;
+  border-radius: .375em;
+  box-shadow: none;
+  box-sizing: border-box;
+  color: #363636;
+  cursor: pointer;
+  display: inline-flex;
+  font-family: BlinkMacSystemFont,-apple-system,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Fira Sans","Droid Sans","Helvetica Neue",Helvetica,Arial,sans-serif;
+  font-size: 1rem;
+  height: 2.5em;
+  justify-content: center;
+  line-height: 1.5;
+  padding: calc(.5em - 1px) 1em;
+  position: relative;
+  text-align: center;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  vertical-align: top;
+  white-space: nowrap;
+}
+
+.button-8:active {
+  border-color: #4a4a4a;
+  outline: 0;
+}
+
+.button-8:focus {
+  border-color: #485fc7;
+  outline: 0;
+}
+
+.button-8:hover {
+  border-color: #b5b5b5;
+}
+
+.button-8:focus:not(:active) {
+  box-shadow: rgba(72, 95, 199, .25) 0 0 0 .125em;
+}
+.address-box{
+
+    padding:10px;
+}
+.button-62 {
+margin:3px;
+  background: linear-gradient(to bottom right, #EF4765, #FF9A5A);
+  border: 0;
+  border-radius: .375em;
+  color: #FFFFFF;
+  cursor: pointer;
+  display: inline-block;
+  font-family: -apple-system,system-ui,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 2.5;
+  outline: transparent;
+  padding: 0 1rem;
+  text-align: center;
+  text-decoration: none;
+  transition: box-shadow .2s ease-in-out;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  white-space: nowrap;
+}
+
+.button-62:not([disabled]):focus {
+  box-shadow: 0 0 .25rem rgba(0, 0, 0, 0.5), -.125rem -.125rem 1rem rgba(239, 71, 101, 0.5), .125rem .125rem 1rem rgba(255, 154, 90, 0.5);
+}
+
+.button-62:not([disabled]):hover {
+  box-shadow: 0 0 .25rem rgba(0, 0, 0, 0.5), -.125rem -.125rem 1rem rgba(239, 71, 101, 0.5), .125rem .125rem 1rem rgba(255, 154, 90, 0.5);
+}
+.contact-details-text-wrapper{
+
+display: flex;
+justify-content: space-between;
+}
+.contact-details, .address-provided-wrapper, .order-wrapper{
+
+    margin: 10px;
+   
+   
+    box-shadow: rgba(0, 0, 0, 0.1) 0px 1px 2px 0px;
+    
+
+    padding: 10px;
+    line-height: 30px;
+
+}
+
+.contact-details-text, .address-header-container, .order-header{
+
+    display:flex;
+    flex-direction:row;
+   
+    
+    font-size: 12px;
+   
+    
+   
+    
+
+}
+
+.contact-details-favicon, .address-header-favicon{
+    padding-right:10px;
+ 
+
+}
+
+
+.email-provided-text{
+
+display: flex;
+flex-direction: row;
+color:gray;
+font-size: 12px;
+}
+
+.email-provided-favicon{
+padding-right:10px;
+}
+
+.phone-provided-text{
+
+display: flex;
+flex-direction: row;
+color: gray;
+font-size: 12px;
+}
+
+.phone-provided-favicon{
+
+padding-right: 10px;
+}
+
+.edit-contact .button-8{
+
+color:#528FF0;
+font-weight: 600;
+    font-size: 12px;
+}
+
+.address-complete{
+
+    font-size: 12px;
+    color:gray;
+
+}
+
+.address-header-edit .button-8{
+    color:#528FF0;
+    font-weight: 600;
+        font-size: 12px;
+}
+
+.order-details{
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+   
+    font-size: 12px;
+    color:gray;
+}

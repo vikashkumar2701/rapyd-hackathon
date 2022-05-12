@@ -1,4 +1,3 @@
-
 (function () {
     
     function MockPay({amount, keyId, onSuccess, onFailure, customer, themeColor}) {
@@ -41,6 +40,18 @@
             paymentCardWrapper.className = 'payment-card-wrapper';
             const paymentCard = document.createElement('div');
             paymentCard.className = 'payment-card';
+
+            const loadingOverlay = document.createElement('div');
+            loadingOverlay.className = 'loading hide';
+            const loadingGif = document.createElement('img');
+            loadingGif.src = "../rocket.gif";
+            loadingGif.className = "loading-animation";
+            const loadingText = document.createElement('p');
+            loadingText.style.color = 'black';
+            loadingText.innerText = 'Processing...';
+            loadingOverlay.appendChild(loadingGif);
+            loadingOverlay.appendChild(loadingText);
+            paymentCardWrapper.appendChild(loadingOverlay);
 
             const infoDiv = document.createElement('div');
             infoDiv.className = 'payment-card-header';
@@ -125,6 +136,33 @@
             emailcontainer.appendChild(emailinput);
 
 
+
+
+
+            const customernamecontainer = document.createElement('div');
+            customernamecontainer.className = 'payment-card-header-email-container';
+           
+
+            const customernamecontainericon = document.createElement('i');
+            
+            customernamecontainericon.className = 'fa-solid fa-user';
+            customernamecontainericon.style.color = '#828282';
+            
+            customernamecontainericon.style.marginLeft= '10px';
+            customernamecontainer.appendChild(customernamecontainericon);
+
+            const customernameinput = document.createElement("input");
+           
+            customernameinput.className = 'payment-card-header-mobilenumber-input';
+            customernameinput.setAttribute('id','customernameinput');
+         
+
+            customernameinput.type = "text";
+            customernameinput.className = "payment-card-input";
+            customernameinput.placeholder = "Enter Your Name";
+            customernamecontainer.appendChild(customernameinput);
+
+
          
             const mobilenumbersection = document.createElement('div');
         
@@ -135,18 +173,28 @@
             
             const countrycode = document.createElement("select");
             countrycode.id="countrycode";
+
            async function getCountryCodes() {
+            loadingOverlay.classList.remove('hide');
             const txn = await request('http://localhost:3000/countries', "GET", {});
             console.log(txn.body.data);
             countrycodeslist = txn.body.data;
             for (var i = 0; i < countrycodeslist.length; i++) {
                 var iterator = document.createElement("option");
-                iterator.value = countrycodeslist[i].iso_alpha2;
+                if(countrycodeslist[i].phone_code == 91){
+
+                    iterator.setAttribute("selected", "selected");
+                }
+                iterator.value = countrycodeslist[i].iso_alpha2 +" "+ countrycodeslist[i].currency_code + " "+ countrycodeslist[i].phone_code;
                 iterator.text = countrycodeslist[i].phone_code +" ("+ countrycodeslist[i].iso_alpha2 +")";
                 countrycode.appendChild(iterator);
             }
+            loadingOverlay.classList.add('hide');
            }
+           
            getCountryCodes();
+           
+
                  
             countrycode.className = "payment-card-input";
           
@@ -154,6 +202,7 @@
             const phone = document.createElement("input");
             phone.type = "text";
             phone.style.width="100%";
+            phone.value="6205836061"
             phone.className = "payment-card-input";
             phone.placeholder = "Enter Mobile Number";
             
@@ -167,127 +216,10 @@
             mobilenumbersection.appendChild(countrycode);
             mobilenumbersection.appendChild(phone);
             mobilenumbersection.appendChild(phoneicon);
-
+            firstcontainer.appendChild(customernamecontainer);
             firstcontainer.appendChild(emailcontainer);
             firstcontainer.appendChild(mobilenumbersection);
-
-            const cardNumberInput = document.createElement("input");
-            cardNumberInput.placeholder = '1234 5678 9101 1213';
-            cardNumberInput.autocompletetype = 'cc-number';
-            cardNumberInput.onkeypress = ev => {
-                const key = String.fromCharCode(ev.which);
-                const shouldEscape = key.length === 1 && /[^0-9]/.test(key);
-                const isNumber = key.length === 1 && /\d/.test(key)
-                const isDelete = ['backspace', 'delete'].includes(key.toLowerCase());
-
-                if (isDelete) {
-                    const lastSpaceIndex = cardNumberInput.value.lastIndexOf(' ');
-                    let factor = 0;
-                    if (cardNumberInput.value.length - 2 === lastSpaceIndex) {
-                        factor = 1
-                    }
-                    cardNumberInput.value = cardNumberInput.value.slice(0, cardNumberInput.value.length - factor);
-                } else if (shouldEscape) {
-                    ev.preventDefault();
-                    return;
-                } else if (isNumber) {
-                    ev.preventDefault();
-                    cardNumberInput.value = cardNumberInput.value.length <= 18 ? cardNumberInput.value.concat(key) : cardNumberInput.value;
-                    const nextSpaceIndex = cardNumberInput.value.lastIndexOf(' ') + 5;
-                    if (cardNumberInput.value.length === nextSpaceIndex && nextSpaceIndex < 19) {
-                        cardNumberInput.value = cardNumberInput.value.concat(' ');
-                    }
-                    if (cardNumberInput.value.length === 19) {
-                        expiryInput.focus();
-                    }
-                }
-                if(cardNumberInput.value.length < 19) {
-                    setValidity(cardNumberInput, false);
-                    return;
-                }
-                setValidity(cardNumberInput, true);
-            }
-
-            const expiryCvvContainer = document.createElement("div");
-            expiryCvvContainer.className = "flex justify-between";
-            const expiryInput = document.createElement("input");
-            expiryInput.placeholder = '02/19';
-            expiryInput.className = 'flex-shrink'
-            expiryInput.onkeypress = ev => {
-                let key = String.fromCharCode(ev.which);
-                const shouldEscape = key.length === 1 && /[^0-9]/.test(key);
-                const isNumber = key.length === 1 && /\d/.test(key)
-                const isDelete = ['backspace', 'delete'].includes(key.toLowerCase());
-
-                if (isDelete) {
-                    let factor = 0;
-                    if (expiryInput.value.length === 4) {
-                        factor = 1
-                    }
-                    expiryInput.value = expiryInput.value.slice(0, expiryInput.value.length - factor);
-                } else if (shouldEscape) {
-                    ev.preventDefault();
-                    return;
-                } else if (isNumber) {
-                    ev.preventDefault();
-                    if (parseInt(key) > 1 && expiryInput.value.length === 0) {
-                        key = `0${key}`
-                    }
-                    expiryInput.value = expiryInput.value.length <= 4 ? expiryInput.value.concat(key) : expiryInput.value;
-                    if (expiryInput.value.length === 2) {
-                        expiryInput.value = expiryInput.value.concat('/');
-                    }
-                    if (expiryInput.value.length === 5) {
-                        cvvInput.focus();
-                    }
-                }
-                if(expiryInput.value.length < 5) {
-                    setValidity(expiryInput, false);
-                    return;
-                }
-                setValidity(expiryInput, true);
-            }
-
-            const cvvInput = document.createElement("input");
-            cvvInput.placeholder = '000';
-            cvvInput.className = 'flex-shrink'
-            cvvInput.onkeypress = ev => {
-                const key = String.fromCharCode(ev.which);
-                const shouldEscape = key.length === 1 && /[^0-9]/.test(key);
-                const isNumber = key.length === 1 && /\d/.test(key)
-                const isDelete = ['backspace', 'delete'].includes(key.toLowerCase());
-
-                if (isDelete) {
-                    cvvInput.value = cvvInput.value.slice(0, cvvInput.value.length);
-                } else if (shouldEscape) {
-                    ev.preventDefault();
-                    return;
-                } else if (isNumber) {
-                    ev.preventDefault();
-                    cvvInput.value = cvvInput.value.length <= 2 ? cvvInput.value.concat(key) : cvvInput.value;
-                    if (cvvInput.value.length === 3) {
-                        nameInput.focus();
-                    }
-                }
-                if(cvvInput.value.length < 3) {
-                    setValidity(cvvInput, false);
-                    return;
-                }
-                setValidity(cvvInput, true);
-            };
-
-            expiryCvvContainer.appendChild(expiryInput);
-            expiryCvvContainer.appendChild(cvvInput);
-
-            const nameInput = document.createElement("input");
-            nameInput.placeholder = 'Name on card';
-            nameInput.onkeypress = () => {
-                if(nameInput.value.length === 0) {
-                    setValidity(nameInput, false);
-                    return;
-                }
-                setValidity(nameInput, true);
-            }
+     
             const companyname = document.createElement("div")
             companyname.innerText = 'Powered By Rapyd';
             companyname.className = 'payment-card-companyname';
@@ -295,23 +227,535 @@
             const proceedbtn = document.createElement("button")
             proceedbtn.innerText = 'Proceed';
             proceedbtn.className = 'pay-button';
+            proceedbtn.setAttribute('id','absbtn');
             proceedbtn.style.backgroundColor = this.themeColor;
             proceedbtn.onclick = async () => {
                
                 
-                secondframe(emailinput.value, phone.value, countrycode.value );
-            
+                afterfirstframe(emailinput.value, phone.value, countrycode.value, customernameinput.value, this.amount);
+                // overview(emailinput.value, phone.value, countrycode.value, customernameinput.value, this.amount);
                 
             }
 
 
+            async function afterfirstframe(email,phone, countrycode, customername, amount) {
+                const mycountrycodearr = countrycode.split(" ");
+                console.log(mycountrycodearr);
+                const thisform = document.getElementById('frame1');
+                thisform.style.display = 'none';
+                const thisform2 = document.getElementById('frame2');
+                thisform2.style.display = 'block';
+                
+                console.log(email+" " + phone+" " + mycountrycodearr[0]+ " " + mycountrycodearr[1]+ " " + customername+ " " + amount);
+                var payment_methods_arr=[];
+                console.log("Proceeding");
+                while(thisform2.firstChild){
+                    thisform2.removeChild(thisform2.firstChild);
+                }
+                loadingOverlay.classList.remove('hide');
+                const sendOtp = await request('http://localhost:3000/sendotp/'+ mycountrycodearr[2] +'/number/'+ phone, "GET", {});
+                loadingOverlay.classList.add('hide');
+                const accesskey = sendOtp.token;
+                console.log(accesskey);
+                console.log("I am here");
+                const profile = document.createElement("div");
+                profile.className = 'payment-profile';
+                profile.onclick = (() => {
+                    const thisform = document.getElementById('frame1');
+                    thisform.style.display = 'block';
+                    const thisform2 = document.getElementById('frame2');
+                    thisform2.style.display = 'none';
+                    });
+                const profileimg = document.createElement("div");
+                profileimg.innerHTML = '<i class="fa-solid fa-pen-to-square"></i>';
+                profileimg.className = 'payment-profile-img';
+                profile.appendChild(profileimg);
+                const profileName = document.createElement("div");
+                profileName.className = 'payment-profile-name';
+                profileName.innerText = email;
+                const profileEmail = document.createElement("div");
+                profileEmail.className = 'payment-profile-email';
+    
+                profileEmail.innerText = phone;
+                profile.appendChild(profileName);
+                profile.appendChild(profileEmail);
+                thisform2.appendChild(profile);
+                
+                
+                const check_if_address_exist = await fetch(`http://localhost:3000/checkifexist/`+mycountrycodearr[2]+'/number/'+phone, {});
+                // console.log(check_if_address_exist.status);
+                if(check_if_address_exist.status === 200) {
+                    const messagebox = document.createElement("div");
+                    messagebox.className = 'otp-container';
+                    const verifymobilenumber = document.createElement("div");
+                    verifymobilenumber.className = 'verifymobilenumber';
+                    const verifymobilenumbertext = document.createElement("div");
+                    const imptext = document.createElement("div");
+                    imptext.innerText = "To use your saved addresses, enter the OTP sent to +" + mycountrycodearr[2] + phone;
+                    imptext.className = 'imptext';
+                    verifymobilenumbertext.appendChild(imptext);
+                    const otparea = document.createElement("div");
+                    otparea.className = 'otp-area';
+
+                    const getotp = document.createElement("input");
+                    getotp.type = "text";
+                    getotp.className = 'payment-card-input';
+                    getotp.placeholder = "Enter OTP";
+                    const getotpbtn = document.createElement("button");
+                    getotpbtn.setAttribute('id','primary');
+                    getotpbtn.innerText = "Verify";
+                    getotpbtn.onclick = async () => {
+                    const otp = getotp.value;
+                    var myHeaders = new Headers();
+                    myHeaders.append("x-access-key", accesskey);
+                    myHeaders.append("Content-Type", "application/json");
+                    var raw = JSON.stringify({
+                    "otp": getotp.value,
+                    "countrycode": mycountrycodearr[2],
+                    "number": phone
+                    });
+
+                    var requestOptions = {
+                    method: 'POST',
+                    headers: myHeaders,
+                    body: raw,
+                    redirect: 'follow'
+                    };
+
+                let resp = await fetch("http://localhost:3000/verifyotp", requestOptions)
+                resp = await resp.json();
+                console.log(resp.status);
+                if(resp.status==="true"){
+                    const address = resp.address;
+                    
+                    alert(resp.message);
+                    addressframe(email, phone, countrycode, customername, amount, address);
+                }
+                else{
+                    alert(resp.message);
+                }
+
+                
+                                        
+
+                    }
+                    const getskipbtn = document.createElement("button");
+                    getskipbtn.className = 'button-8';
+                    getskipbtn.innerText = "Skip";
+                    getskipbtn.onclick = async () => {
+                    }
+                    otparea.appendChild(getotp);
+                    otparea.appendChild(getotpbtn);
+                    otparea.appendChild(getskipbtn);
+                    verifymobilenumber.appendChild(verifymobilenumbertext);
+                    verifymobilenumber.appendChild(otparea);
+              
+                    messagebox.appendChild(verifymobilenumber);
+                    
+                   
+                 
+                    thisform2.appendChild(messagebox);
+                }
+                else{
+
+
+                }
+               
+
+
+            }
+
+            async function addressframe(email,phone, countrycode, customername, amount, address) {
+
+                console.log(email+" " + phone+" " + countrycode+ " " + customername+ " " + amount+ " " + address);
+                const mycountrycodearr = countrycode.split(" ");
+                console.log(mycountrycodearr);
+                const thisform = document.getElementById('frame1');
+                thisform.style.display = 'none';
+                const thisform2 = document.getElementById('frame2');
+                thisform2.style.display = 'block';
+                while(thisform2.firstChild){
+                    thisform2.removeChild(thisform2.firstChild);
+                }
+                const profile = document.createElement("div");
+                profile.className = 'payment-profile';
+                profile.onclick = (() => {
+                    const thisform = document.getElementById('frame1');
+                    thisform.style.display = 'block';
+                    const thisform2 = document.getElementById('frame2');
+                    thisform2.style.display = 'none';
+                    });
+                const profileimg = document.createElement("div");
+                profileimg.innerHTML = '<i class="fa-solid fa-pen-to-square"></i>';
+                profileimg.className = 'payment-profile-img';
+                profile.appendChild(profileimg);
+                const profileName = document.createElement("div");
+                profileName.className = 'payment-profile-name';
+                profileName.innerText = email;
+                const profileEmail = document.createElement("div");
+                profileEmail.className = 'payment-profile-email';
+    
+                profileEmail.innerText = phone;
+                profile.appendChild(profileName);
+                profile.appendChild(profileEmail);
+                thisform2.appendChild(profile);
+                const addresscontainer = document.createElement("div");
+                
+                for(let i=0;i<address.length;i++){
+                    const addressbox = document.createElement("div");
+                    addressbox.className = 'address-box';
+                    addressbox.setAttribute('id', address[i]._id);
+                    const addressboxtext = document.createElement("div");
+                    addressboxtext.className = 'address-box-text';
+                    
+
+                    addressboxtext.innerText = address[i].Address1 + "," + address[i].Address2+ "," + address[i].City + ", "+ address[i].State + ", " +address[i].Country + ", "+ address[i].PinCode;
+
+
+
+                    const addressboxbtn = document.createElement("button");
+                    
+                    addressboxbtn.className = 'button-8';
+                    addressboxbtn.innerText = "Select";
+                    addressboxbtn.onclick = (() => {
+                        console.log(address[i]._id);
+
+                        overview(email, phone, countrycode, customername, amount, address[i]._id, address[i].Address1, address[i].Address2, address[i].City, address[i].State, address[i].Country, address[i].PinCode, address);
+                        // secondframe(email, phone, countrycode, customername, amount, address[i]._id, address[i].Address1, address[i].Address2, address[i].City, address[i].State, address[i].Country, address[i].PinCode, address);
+                    });
+                    const editaddressbtn = document.createElement("button");
+                    editaddressbtn.className = 'button-8';
+                    editaddressbtn.innerText = "Edit";
+                    editaddressbtn.onclick = (() => {
+                        alert("Editing address");
+                    });
+                    const deleteaddressboxbtn = document.createElement("button");
+                    deleteaddressboxbtn.className = 'button-62';
+                    deleteaddressboxbtn.innerText = "Delete";
+                    deleteaddressboxbtn.onclick = (() => {
+                        let headersList = {
+                            "Content-Type": "application/json"
+                           }
+                           
+                           let bodyContent = JSON.stringify({
+                               "phone" : mycountrycodearr[2]+phone,
+                               "id" : address[i]._id
+                           });
+                           
+                           fetch("https://rapyduser.herokuapp.com/deleteAddress", { 
+                             method: "POST",
+                             body: bodyContent,
+                             headers: headersList
+                           }).then(function(response) {
+                            
+                             const deletedarea = document.getElementById(address[i]._id);
+                             deletedarea.remove();
+                             return response.text();
+                           }).then(function(data) {
+                             console.log(data);
+                           })
+
+                    });
+                    
+                    addressbox.appendChild(addressboxtext);
+                    addressbox.appendChild(addressboxbtn);
+                    addressbox.appendChild(deleteaddressboxbtn);
+
+                    addresscontainer.appendChild(addressbox);
+
+                }
+                thisform2.appendChild(addresscontainer);
 
 
 
 
-            async function secondframe(email, phone, countrycode) {
-                var ccode = countrycode;
-                console.log(email+" " + phone+" " + countrycode);
+
+
+
+
+            }
+
+            async function overview(email, phone, countrycode, customername, amount, addressid, address1, address2, city, state, country, pin, addresses) {
+
+                console.log(email+" " + phone+" " + countrycode+ " " + customername+ " " + amount+ " " + addressid+ " " + address1+ " " + address2+ " " + city+ " " + state+ " " + country+ " " + pin + " " + addresses);
+                const thisform = document.getElementById('frame1');
+                thisform.style.display = 'none';
+                const thisform2 = document.getElementById('frame2');
+                thisform2.style.display = 'block';
+                while(thisform2.firstChild){
+                    thisform2.removeChild(thisform2.firstChild);
+                }
+               const contactdetails = document.createElement("div");
+                contactdetails.className = 'contact-details';
+                const contactdetailstextwrapper = document.createElement("div");
+                contactdetailstextwrapper.className = 'contact-details-text-wrapper';
+                const contactdetailstext = document.createElement("div");
+                contactdetailstext.className = 'contact-details-text';
+                const contactdetailsfavicon = document.createElement("div");
+                contactdetailsfavicon.className = 'contact-details-favicon';
+                contactdetailsfavicon.innerHTML = '<i class="fa-solid fa-user"></i>';
+                const contactdetailsname = document.createElement("div");
+                contactdetailsname.className = 'contact-details-name';
+                contactdetailsname.innerText = "Contact Details";
+                contactdetailstext.appendChild(contactdetailsfavicon);
+                contactdetailstext.appendChild(contactdetailsname);
+
+                const edit_contact = document.createElement("div");
+                edit_contact.className = 'edit-contact';
+                const edit_contact_buton = document.createElement("button");
+                edit_contact_buton.className = 'button-8';
+                edit_contact_buton.innerText = "Edit / Change";
+                edit_contact_buton.onclick = (() => {
+                    const thisform = document.getElementById('frame1');
+                    thisform.style.display = 'block';
+                    const thisform2 = document.getElementById('frame2');
+                    thisform2.style.display = 'none';
+                });
+
+                edit_contact.appendChild(edit_contact_buton);
+
+
+                
+
+
+                contactdetailstextwrapper.appendChild(contactdetailstext);
+                contactdetailstextwrapper.appendChild(edit_contact);
+                contactdetails.appendChild(contactdetailstextwrapper);
+
+                const email_provided = document.createElement("div");
+                email_provided.className = 'email-provided';
+                const email_providedtext = document.createElement("div");
+                email_providedtext.className = 'email-provided-text';
+                const email_providedfavicon = document.createElement("div");
+                email_providedfavicon.className = 'email-provided-favicon';
+                email_providedfavicon.innerHTML = '<i class="fa-solid fa-envelope"></i>';
+                const email_providedname = document.createElement("div");
+                email_providedname.className = 'email-provided-name';
+                email_providedname.innerText = email;
+                email_providedtext.appendChild(email_providedfavicon);
+                email_providedtext.appendChild(email_providedname);
+                email_provided.appendChild(email_providedtext);
+
+
+
+                const phone_provided = document.createElement("div");
+                phone_provided.className = 'phone-provided';
+                const phone_providedtext = document.createElement("div");
+                phone_providedtext.className = 'phone-provided-text';
+                const phone_providedfavicon = document.createElement("div");
+                phone_providedfavicon.className = 'phone-provided-favicon';
+                phone_providedfavicon.innerHTML = '<i class="fa-solid fa-phone"></i>';
+                const phone_providedname = document.createElement("div");
+                phone_providedname.className = 'phone-provided-name';
+                phone_providedname.innerText = phone;
+                phone_providedtext.appendChild(phone_providedfavicon);
+                phone_providedtext.appendChild(phone_providedname);
+                phone_provided.appendChild(phone_providedtext);
+                contactdetails.appendChild(email_provided);
+            contactdetails.appendChild(phone_provided);
+
+
+
+                
+            const address_provided_wrapper = document.createElement("div");
+            address_provided_wrapper.className = 'address-provided-wrapper';
+
+                const address_header = document.createElement("div");
+                address_header.style = 'display:flex;justify-content:space-between';
+
+               
+                const address_header_container = document.createElement("div");
+                address_header_container.className = 'address-header-container';
+
+                const address_headerfavicon = document.createElement("div");
+                address_headerfavicon.className = 'address-header-favicon';
+                address_headerfavicon.innerHTML = '<i class="fa-solid fa-map-marker-alt"></i>';
+
+
+                const address_headername = document.createElement("div");
+                address_headername.className = 'address-header-name';
+                address_headername.innerText = "Address";
+
+                address_header_container.appendChild(address_headerfavicon);
+                address_header_container.appendChild(address_headername);
+
+                const address_header_edit = document.createElement("div");
+                address_header_edit.className = 'address-header-edit';
+                
+                const address_header_edit_button = document.createElement("button");
+                address_header_edit_button.className = 'button-8';
+                address_header_edit_button.innerText = "Edit / Change";
+                address_header_edit_button.onclick = (() => {
+                    const thisform = document.getElementById('frame1');
+                    thisform.style.display = 'block';
+                    const thisform2 = document.getElementById('frame2');
+                    thisform2.style.display = 'none';
+                });
+
+                address_header_edit.appendChild(address_header_edit_button);
+
+                address_header.appendChild(address_header_container);
+                address_header.appendChild(address_header_edit);
+              
+
+                const address_complete = document.createElement("div");
+                address_complete.className = 'address-complete';
+              
+                const address_line_1 = document.createElement("div");
+                address_line_1.className = 'address-line-1';
+                address_line_1.innerHTML = address1 + ", " + address2;
+
+                
+
+                const address_line_3_container = document.createElement("div");
+                address_line_3_container.style = 'display:flex;justify-content:space-between;';
+                const address_line_3 = document.createElement("div");
+                address_line_3.className = 'address-line-3';
+                address_line_3.innerHTML = "City: " + city;
+
+                const address_line_4 = document.createElement("div");
+                address_line_4.className = 'address-line-4';
+                address_line_4.innerHTML = "State: " + state;
+
+                const address_line_5_wrapper = document.createElement("div");
+                address_line_5_wrapper.style = 'display:flex;justify-content:space-between;';
+
+                const address_line_5 = document.createElement("div");
+                address_line_5.className = 'address-line-5';
+                address_line_5.innerHTML = "Country: " + country;
+
+                const address_line_6 = document.createElement("div");
+                address_line_6.className = 'address-line-6';
+                address_line_6.innerHTML = "Pin: " + pin;
+
+                address_line_5_wrapper.appendChild(address_line_5);
+                address_line_5_wrapper.appendChild(address_line_6);
+
+
+                address_line_3_container.appendChild(address_line_3);
+                address_line_3_container.appendChild(address_line_4);
+
+
+                address_complete.appendChild(address_line_1);
+               
+                address_complete.appendChild(address_line_3_container);
+                address_complete.appendChild(address_line_5_wrapper);
+
+
+                
+
+
+
+                
+                address_provided_wrapper.appendChild(address_header);
+                address_provided_wrapper.appendChild(address_complete);
+
+
+
+                const order_wrapper = document.createElement("div");
+                order_wrapper.className = 'order-wrapper';
+
+                const order_header = document.createElement("div");
+                order_header.className = 'order-header';
+                order_header.innerText = "Order Summary";
+
+                order_wrapper.appendChild(order_header);
+
+                var discount = 0;
+                var total = amount-discount;
+                const order_details = document.createElement("div");
+                order_details.className = 'order-details';
+
+
+                const originalprice_container = document.createElement("div");
+                originalprice_container.style = 'display:flex;justify-content:space-between;';
+
+                const originalprice = document.createElement("div");
+                originalprice.className = 'original-price';
+
+                
+                originalprice.innerText = "Original Price";
+
+                const originalprice_value = document.createElement("div");
+                originalprice_value.className = 'original-price-value';
+                originalprice_value.innerText = amount;
+
+                originalprice_container.appendChild(originalprice);
+                originalprice_container.appendChild(originalprice_value);
+
+
+                const discount_container = document.createElement("div");
+                discount_container.style = 'display:flex;justify-content:space-between;';
+                const discount_div = document.createElement("div");
+                discount_div.className = 'discount';
+                discount_div.innerText = "Discount";
+
+                const discount_value = document.createElement("div");
+                discount_value.className = 'discount-value';
+                discount_value.innerText = discount;
+
+                discount_container.appendChild(discount_div);
+                discount_container.appendChild(discount_value);
+
+                const final_container = document.createElement("div");
+                final_container.style = 'display:flex;justify-content:space-between;';
+
+                const finalprice = document.createElement("div");
+                finalprice.className = 'final-price';
+                finalprice.innerText = "Final Price";
+
+                const finalprice_value = document.createElement("div");
+                finalprice_value.className = 'final-price-value';
+                finalprice_value.innerText = total;
+
+                final_container.appendChild(finalprice);
+                final_container.appendChild(finalprice_value);
+
+                const paybutton = document.createElement("button");
+                paybutton.className = 'pay-button';
+                paybutton.id = 'absbtn';
+                paybutton.innerText = "Pay";
+                paybutton.onclick = (() => {
+                    const thisform = document.getElementById('frame1');
+                    thisform.style.display = 'none';
+                    const thisform2 = document.getElementById('frame2');
+                    thisform2.style.display = 'block';
+                }
+                );
+
+
+                
+                order_details.appendChild(originalprice_container);
+                order_details.appendChild(discount_container);
+                order_details.appendChild(final_container);
+                order_wrapper.appendChild(order_details);
+                
+
+
+
+
+
+
+
+               
+
+
+
+
+
+                thisform2.appendChild(contactdetails);
+                thisform2.appendChild(address_provided_wrapper);
+                thisform2.appendChild(order_wrapper);
+                thisform2.appendChild(paybutton);
+              
+            }
+
+
+
+            async function secondframe(email, phone, countrycode, customername, amount) {
+                
+                const mycountrycodearr = countrycode.split(" ");
+                console.log(email+" " + phone+" " + mycountrycodearr[0]+ " " + mycountrycodearr[1]+ " " + customername+ " " + amount);
                 var payment_methods_arr=[];
                 console.log("Proceeding");
                 while(secondcontainer.firstChild){
@@ -356,7 +800,7 @@
 
 
                 payment_methods_names_X =["Card", "eWallet", "Cash", "Bank Transfer", "Bank Redirect"];
-
+                
                 for (var i = 0; i < payment_methods_names_X.length; i++) {
                    let name = payment_methods_names_X[i];
                    console.log(name);
@@ -373,7 +817,7 @@
                         const thisform3 = document.getElementById('frame3');
                         thisform3.style.display = 'block';
 
-                        thirdframe(name,ccode, card_store, eWallet_store, Cash_store, Bank_Transfer_store, Bank_Redirect_store);
+                        thirdframe(name,mycountrycodearr[0], card_store, eWallet_store, Cash_store, Bank_Transfer_store, Bank_Redirect_store, email, phone, customername, mycountrycodearr[1], amount);
                         }
                     );
 
@@ -382,7 +826,8 @@
               
                 
             }
-            const paymentmethods = await request('http://localhost:3000/FetchPaymentMethods/'+countrycode, "GET", {});
+            loadingOverlay.classList.remove('hide');
+            const paymentmethods = await request('http://localhost:3000/FetchPaymentMethods/'+mycountrycodearr[0], "GET", {});
             let card_store = [];
             let eWallet_store = [];
             let Cash_store = [];
@@ -408,7 +853,7 @@
                     Bank_Redirect_store.push(element);
                 }
             });
-
+            loadingOverlay.classList.add('hide');
             
            
             const thisform = document.getElementById('frame1');
@@ -419,8 +864,8 @@
             }
 
 
-            async function thirdframe(payment_methods_name, countrycode, card_store, eWallet_store, Cash_store, Bank_Transfer_store, Bank_Redirect_store) {
-                console.log(countrycode);
+            async function thirdframe(payment_methods_name, countrycode, card_store, eWallet_store, Cash_store, Bank_Transfer_store, Bank_Redirect_store, email, phone, customername, currency, amount) {
+                console.log(countrycode+ " " +currency);
                
                
 
@@ -453,17 +898,20 @@
                 
 
                 payment_methods_arr_load.forEach(element => {
-                   
-                    const payment_icon = document.createElement("div");
-                    payment_icon.className = 'payment-icon';
-                    payment_icon.innerHTML = '<img src="'+element.image+'" alt="" class="payment-card-image-load">';
-                    paymentmethods_cards_load.appendChild(payment_icon);
-                    // const payment_card_name = document.createElement("div");
-                    // payment_card_name.className = 'payment-card-name';
-                    // payment_card_name.innerText = element.name;
-                    // paymentmethods_cards_load.appendChild(payment_card_name);
-                  
                     
+                    let name = element.type;
+
+                    const loaderspecific_methods = document.createElement("div");
+                    loaderspecific_methods.className = 'payment-icon';
+                 
+                    loaderspecific_methods.id = name;
+                    loaderspecific_methods.innerHTML = '<img src="'+element.image+'" alt="" class="payment-card-image-load">';
+                    loaderspecific_methods.onclick = (() => {
+                        
+                        forthframe(payment_methods_name, email, phone, name, customername, countrycode, currency, amount);
+                    });
+                    paymentmethods_cards_load.appendChild(loaderspecific_methods);
+                               
 
                     console.log(element);
                 });
@@ -491,7 +939,82 @@
 
             }
 
+            async function forthframe(payment_methods_name, email, phone, paymentid, customername, countrycode, currency, amount) {
 
+                const thisform = document.getElementById('frame1');
+                thisform.style.display = 'none';
+                const thisform2 = document.getElementById('frame2');
+                thisform2.style.display = 'none';
+                const thisform3 = document.getElementById('frame3');
+                thisform3.style.display = 'none';
+                const thisform4 = document.getElementById('frame4');
+                thisform4.style.display = 'block';
+                while(forthcontainer.firstChild){
+                    forthcontainer.removeChild(forthcontainer.firstChild);
+                }
+                    console.log(payment_methods_name+ " " + email + " " + phone + " " + paymentid + " " + customername + " " + countrycode + " " + currency + " " + amount);
+                    const backbtn = document.createElement("div");
+                    backbtn.className = 'back-button';
+                    
+                    backbtn.innerHTML = '<i class="fa fa-arrow-left" aria-hidden="true"></i>Back';
+                    
+                    backbtn.style.backgroundColor = this.themeColor;
+                    backbtn.onclick = (() => {
+                        const thisform = document.getElementById('frame1');
+                        thisform.style.display = 'none';
+                        const thisform2 = document.getElementById('frame2');
+                        thisform2.style.display = 'none';
+                        const thisform3 = document.getElementById('frame3');
+                        thisform3.style.display = 'block';
+                        const thisform4 = document.getElementById('frame4');
+                        thisform4.style.display = 'none';
+                    });
+                   
+                    let currentepochtime =  Math.floor( new Date().getTime() / 1000 )+5000;
+                    console.log(currentepochtime);
+                    let sendpostrequest = await fetch('http://localhost:3000/checkout', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+
+                       
+                        body: JSON.stringify({
+                            
+                                "amount": amount,
+                                "complete_payment_url": "http://example.com/complete",
+                                "country": countrycode,
+                                "currency": currency,
+                                // "requested_currency": "USD",
+                               
+                                "error_payment_url": "http://example.com/error",
+                                "merchant_reference_id": "950ae8c6-78",
+                                "language": "en",
+                                "metadata": {
+                                    "merchant_defined": true
+                                },
+                                "payment_method_types_include": [
+                                    paymentid
+                                ],
+                                
+                                "payment_method_types_exclude": []
+                            
+                        })
+                    });
+                    const json_start_checkout = await sendpostrequest.json();
+                    console.log(json_start_checkout.body);
+
+                    window.open(json_start_checkout.body.data.redirect_url, "popup", "width=500,height=500");
+                    const fetchrequiredfields = await request('http://localhost:3000/requiredfields/'+paymentid, "GET", {});
+
+                    console.log(fetchrequiredfields.body.data);
+                    forthcontainer.appendChild(backbtn);
+                    loadingOverlay.classList.remove('hide');
+                    pollTransactionStatus(json_start_checkout.body.data.id);
+                    // forthcontainer.appendChild(checkout_iframe);
+                    loadingOverlay.classList.add('hide');
+
+            };
 
 
 
@@ -576,6 +1099,12 @@
             thirdcontainer.setAttribute('id','frame3');
      
             paymentCard.appendChild(thirdcontainer);
+
+            const forthcontainer = document.createElement('div');
+            forthcontainer.style.display='none';
+            forthcontainer.setAttribute('id','frame4');
+            paymentCard.appendChild(forthcontainer);
+
           
 
 
@@ -594,19 +1123,11 @@
          
             
 
-            const loadingOverlay = document.createElement('div');
-            loadingOverlay.className = 'loading hide';
-            const loadingGif = document.createElement('img');
-            loadingGif.src = "../loading_animation.gif";
-            loadingGif.className = "loading-animation";
-            const loadingText = document.createElement('p');
-            loadingText.style.color = 'black';
-            loadingText.innerText = 'Processing Transaction';
-            loadingOverlay.appendChild(loadingGif);
-            loadingOverlay.appendChild(loadingText);
+          
 
             paymentCardWrapper.appendChild(paymentCard);
             paymentCardWrapper.appendChild(loadingOverlay);
+            
             overlay.appendChild(paymentCardWrapper);
             body.appendChild(overlay);
 
@@ -634,27 +1155,27 @@
         })
     }
 
-    function pollTransactionStatus(txnId, apiKey) {
+    function pollTransactionStatus(checkoutid) {
         return new Promise(resolve => {
             const poll = setInterval(() => {
                 const xhr = new XMLHttpRequest();
                 xhr.onreadystatechange = function () {
                     if (this.readyState === 4 && this.status === 200) {
-                        const data = JSON.parse(this.responseText);
-                        if (["success", "failed"].includes(data["status"])) {
+                        const body = JSON.parse(this.responseText);
+                        console.log(body.body.data.payment.captured);
+                        var status = body.body.data.payment.captured;
+                        if (status){
+                            console.log("I am here");
                             clearInterval(poll);
-                            resolve(data);
+                            resolve(body.body.data.payment);
+                            
                         }
                     }
                 }
-                xhr.open("POST", `https://domain.com/transactions/${txnId}/status/`);
+                xhr.open("GET", `http://localhost:3000/checkout/${checkoutid}`);
                 xhr.setRequestHeader('Content-Type', 'application/json');
-                xhr.send(
-                    JSON.stringify({
-                        "api_key": apiKey
-                    })
-                );
-            }, 1000);
+                xhr.send();
+            }, 3000);
         })
     }
 
