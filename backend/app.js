@@ -120,27 +120,90 @@ app.get("/checkout/:checkoutid", async (req, res) => {
     }
 });
 
-app.get("/checkifexist/:countrycode/number/:phonenumber", async (req, res) => {
+app.post("/create/customer", async (req, res) => {
+    let body = req.body;
+    console.log(body);
+    try {
+        const result = await makeRequest('POST', '/v1/customers', body);
+        
+        res.json(result);
 
-    let countrycode = req.params.countrycode;
-    let phonenumber = req.params.phonenumber;
-    // console.log(countrycode);
-    // console.log(phonenumber);
-    axios.get('https://rapyduser.herokuapp.com/checkif/'+countrycode+'/number/'+phonenumber).then(function(response){
-      
-        res.sendStatus(200);
-
-        }).catch(function(error){
-            res.sendStatus(404);
+    } catch (error) {
+        res.json(error);
     }
-    );
+   
+});
+
+
+//Arghyadeep Task -> Create a API to store specific data  {number, email, name, customer_id} in the database by using POST method. I will be sending everything in the body.;
+
+//SYNTAX: app.post("/save/customer", async (req, res) => {} use this syntax to create a new customer in the database.
+
+//Arghyadeep Task -> Check whether the customer id is present or not for that specific phone number.
+
+//SYNTAX: app.get("/check/customer/:number", async (req, res) => {  use this syntax to check whether the customer id is present or not for that specific phone number.
+
+//Arghyadeep Task -> If the customer id is present then return the customer id.
+
+//SYNTAX: app.get("/get/customer/:number", async (req, res) => {  use this syntax to fetch the customer id for that specific phone number.
+
+
+
+
+// Arghyadeep Task -> Create a API to store {customer_id, addresses_id } where the address can be several for the same customer id.
+
+// SYNTAX: app.post("/save/address", async (req, res) => { use this syntax to save the address for the customer.
+
+// I will be sending customer_id and address_id in the body manage no duplication for that customer_id. 
+
+// Arghyadeep Task -> Create a API to check if the address is present or not for that specific customer_id. return type 200 or 404
+
+// SYNTAX: app.get("/checkif/address/:customer_id", async (req, res) => { use this syntax to check whether the address is present or not for that specific customer_id.
+
+// Arghyadeep Task -> Create a API to display array of addresses for that specific customer_id {request type "GET" and url "/customer/:customer_id/addresses"}
+
+// SYNTAX: app.get("/customer/:customer_id/addresses", async (req, res) => { use this syntax to display array of addresses for that specific customer_id.
+
+
+
+
+app.get("/checkifexist/:customer_id", async (req, res) => {
+
+    let customer_id = req.params.customer_id;
+
+    await axios.get('https://rapidapiv2.herokuapp.com/checkif/address/'+customer_id).then(function(response){
+      console.log(response.data.data);
+
+      if(response.data.data.length>=1){
+        const resp = {
+            status: 200
+        }
+        res.status(200).send(resp);
+      }
+
+      else{
+
+        const resp = {
+            status:404
+        }
+        res.status(200).send(resp);
+      }
+   
+
+      }).catch(function(error){
+            const resp = {
+                status: 405,
+            }
+            res.status(200).send(resp);
+    });
 
 });
 
-app.get("/sendotp/:countrycode/number/:phonenumber", async(req, res) => {
+app.get("/sendotp/:countrycode/number/:phonenumber/customerid/:customerid", async(req, res) => {
     
         let countrycode = req.params.countrycode;
         let phonenumber = req.params.phonenumber;
+        let customerid = req.params.customerid;
         
         // console.log(countrycode);
         // console.log(phonenumber);
@@ -151,7 +214,8 @@ app.get("/sendotp/:countrycode/number/:phonenumber", async(req, res) => {
         const token = jwt.sign({
             "otp": encryptedotp,
             "countrycode": countrycode,
-            "phonenumber": phonenumber
+            "phonenumber": phonenumber,
+            "customerid": customerid
 
 
         }, 'secret', { expiresIn: '120s' });
@@ -183,8 +247,7 @@ app.post("/verifyotp", async (req, res) => {
     // console.log(body);
     let otp = body.otp;
 
-    let countrycode = body.countrycode;
-    let phonenumber = body.phonenumber;
+  
     let token = accesskey;
     try{
     const decoded = jwt.verify(token, 'secret');
@@ -193,15 +256,15 @@ app.post("/verifyotp", async (req, res) => {
     
     // const userotp = await bcrypt.hash(otp, salt);
     const checkotp = await bcrypt.compare(otp, decoded.otp);
-    const getaddress = await axios.get(`https://rapyduser.herokuapp.com/getAddress/${decoded.countrycode}/phone/${decoded.phonenumber}`);
-    console.log(getaddress.data);
+    const getaddress = await axios.get(`https://rapidapiv2.herokuapp.com/checkif/address/${decoded.customerid}`);
+    console.log(getaddress.data.data);
     if(checkotp){
         
         const response = {
 
             "status": "true",
             "message": "OTP verified",
-            "address": getaddress.data[0].address
+            "address": getaddress.data.data
 
         }
         
@@ -229,4 +292,97 @@ app.post("/verifyotp", async (req, res) => {
         res.status(404).json(response);
     }
 }
+});
+
+
+app.get("/addresses/:addressid", async (req, res) => {
+const addressid = req.params.addressid;
+try{
+const response = await makeRequest('GET', '/v1/addresses/'+addressid);
+// const resp  = {
+//     "status": "true",
+//     "address_id": response.data.data,
+// }
+res.status(200).json(response.body.data);
+}
+catch(error){
+    const resp  = {
+        "status": "false"
+    }
+    res.status(200).send(error);
+}
+
+});
+
+
+app.post("/save/address/:customerid", async (req, res) => {
+    let body = req.body;
+    let customerid = req.params.customerid;
+    
+    try{
+    const response = await makeRequest('POST', '/v1/addresses', body);
+    console.log(response.body.data);
+    const resp  = {
+        "status": "true",
+        "address_id": response.body.data.id,
+    }
+    const savetodatabase = await axios.post('https://rapidapiv2.herokuapp.com/save/address', {
+    "customer_id": customerid,
+    "address_id": response.body.data.id        
+    });
+    console.log(savetodatabase.data);
+    res.status(200).json(resp);
+    }
+    catch(error){
+        const resp  = {
+            "status": "false"
+        }
+        res.status(200).send(error);
+    }
+
+
+});
+
+
+app.get("/list/coupons", async (req, res) => {
+
+    try{
+    const response = await makeRequest('GET', '/v1/coupons');
+    console.log(response.body.data);
+    const resp  = {
+        "status": "true",
+        "coupons": response.body.data.length,
+    }
+    res.status(200).json(resp);
+    }
+    catch(error){
+        const resp  = {
+            "status": "false",
+            "coupons": 0 
+        }
+        res.status(200).send(error);
+    }
+
+});
+
+
+app.get("/customer/:customerid/paymentmethods", async (req, res) => {
+    let customerid = req.params.customerid;
+    try{
+    const response = await makeRequest('GET', '/v1/customers/'+customerid+'/payment_methods');
+    console.log(response.body.data);
+    const resp  = {
+        "status": "true",
+        "payment_methods": response.body.data
+    }
+    res.status(200).json(resp);
+    }
+    catch(error){
+        const resp  = {
+            "status": "false",
+            "payment_methods": 0 
+        }
+        res.status(200).send(error);
+    }
+
 });
