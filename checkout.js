@@ -7,6 +7,30 @@
         this.onFailure = onFailure;
         this.customer = customer || {};
         this.themeColor = themeColor || "#EC4899";
+        addresses_global = [];
+        countriesdata_global = [];
+        
+        customer_name_global = "";
+        customer_email_global = "";
+        customer_phone_global = "";
+        customer_country_code_global = "";
+
+        customer_billing_name_global ="";
+        customer_billing_phone_global = "";
+        customer_billing_countrycode_global = "";
+        customer_billing_addressline1_global = "";
+        customer_billing_addressline2_global = "";
+        customer_billing_country_global = "";
+        customer_billing_state_global = "";
+        customer_billing_city_global = "";
+        customer_billing_zip_global = "";
+
+        customer_id_global = "cus_e5159c41ba6fb1eb4e339bfbdff2a44d";
+
+        customer_address_global_id = "";
+
+
+
     }
     
     const styleSheetExists = !!document.getElementById('mockpay_checkout_stylesheet');
@@ -177,6 +201,7 @@
            async function getCountryCodes() {
             loadingOverlay.classList.remove('hide');
             const txn = await request('http://localhost:3000/countries', "GET", {});
+            countriesdata_global = txn; 
             console.log(txn.body.data);
             countrycodeslist = txn.body.data;
             for (var i = 0; i < countrycodeslist.length; i++) {
@@ -231,29 +256,88 @@
             proceedbtn.style.backgroundColor = this.themeColor;
             proceedbtn.onclick = async () => {
                
-                
-                afterfirstframe(emailinput.value, phone.value, countrycode.value, customernameinput.value, this.amount);
+                customer_name_global = customernameinput.value;
+                customer_email_global = emailinput.value;
+                customer_phone_global = phone.value;
+                customer_country_code_global = countrycode.value;
+
+                // edit_add_address(emailinput.value,customernameinput.value,countrycode.value,phone.value, this.amount, addresses);
+                // afterfirstframe(this.amount);
+                // coupons_frame(this.amount);
                 // overview(emailinput.value, phone.value, countrycode.value, customernameinput.value, this.amount);
-                
+                secondframe(this.amount);
             }
 
 
-            async function afterfirstframe(email,phone, countrycode, customername, amount) {
-                const mycountrycodearr = countrycode.split(" ");
+            async function afterfirstframe(amount) {
+
+              
+                var customer_id ="";
+                const mycountrycodearr = customer_country_code_global.split(" ");
                 console.log(mycountrycodearr);
+                const check_if_customer_is_present = await request('https://rapidapiv2.herokuapp.com/check/customer', "POST", {
+                    country_code: mycountrycodearr[2],
+                    number: customer_phone_global
+                    });
+                if(check_if_customer_is_present.status == "true"){
+                    console.log("customer is present");
+                    customer_id = check_if_customer_is_present.customer_id;
+                    customer_id_global = customer_id;
+                }
+                else{
+
+                    const create_customer = await request('http://localhost:3000/create/customer', "POST", {
+                        
+    
+                            "email": customer_email_global,
+                            "metadata": {
+                                "merchant_defined": true
+                            },
+                            "name": customer_name_global,
+                            "phone_number": "+"+mycountrycodearr[2]+customer_phone_global
+                
+                     });
+
+                     if(create_customer.body.status.status=="SUCCESS"){
+                            console.log("customer created");
+                            customer_id = create_customer.body.data.id;
+                            customer_id_global = customer_id;
+                            const savetodatabase = await request('https://rapidapiv2.herokuapp.com/save/customer', "POST", {
+                                
+                                    "name" : create_customer.body.data.name,
+                                    "email" : create_customer.body.data.email,
+                                    "number" : create_customer.body.data.phone_number,
+                                    "customer_id" : create_customer.body.data.id
+
+                                
+                            
+
+
+                             });
+                    
+                    console.log(savetodatabase);
+                    
+
+                }
+                else{
+                    console.log("Customer not created");
+                }
+            }
+                console.log(check_if_customer_is_present);
+                
                 const thisform = document.getElementById('frame1');
                 thisform.style.display = 'none';
                 const thisform2 = document.getElementById('frame2');
                 thisform2.style.display = 'block';
                 
-                console.log(email+" " + phone+" " + mycountrycodearr[0]+ " " + mycountrycodearr[1]+ " " + customername+ " " + amount);
+                console.log(customer_email_global+" "+customer_name_global+" "+customer_phone_global+" "+customer_country_code_global);
                 var payment_methods_arr=[];
                 console.log("Proceeding");
                 while(thisform2.firstChild){
                     thisform2.removeChild(thisform2.firstChild);
                 }
                 loadingOverlay.classList.remove('hide');
-                const sendOtp = await request('http://localhost:3000/sendotp/'+ mycountrycodearr[2] +'/number/'+ phone, "GET", {});
+                const sendOtp = await request('http://localhost:3000/sendotp/'+ mycountrycodearr[2] +'/number/'+ customer_phone_global + '/customerid/' + customer_id_global, "GET", {});
                 loadingOverlay.classList.add('hide');
                 const accesskey = sendOtp.token;
                 console.log(accesskey);
@@ -272,18 +356,20 @@
                 profile.appendChild(profileimg);
                 const profileName = document.createElement("div");
                 profileName.className = 'payment-profile-name';
-                profileName.innerText = email;
+                profileName.innerText = customer_email_global;
                 const profileEmail = document.createElement("div");
                 profileEmail.className = 'payment-profile-email';
     
-                profileEmail.innerText = phone;
+                profileEmail.innerText = customer_phone_global;
                 profile.appendChild(profileName);
                 profile.appendChild(profileEmail);
                 thisform2.appendChild(profile);
                 
                 
-                const check_if_address_exist = await fetch(`http://localhost:3000/checkifexist/`+mycountrycodearr[2]+'/number/'+phone, {});
-                // console.log(check_if_address_exist.status);
+                let check_if_address_exist = await fetch(`http://localhost:3000/checkifexist/${customer_id_global}`);
+
+                check_if_address_exist = await check_if_address_exist.json();
+                console.log(check_if_address_exist.status);
                 if(check_if_address_exist.status === 200) {
                     const messagebox = document.createElement("div");
                     messagebox.className = 'otp-container';
@@ -291,7 +377,7 @@
                     verifymobilenumber.className = 'verifymobilenumber';
                     const verifymobilenumbertext = document.createElement("div");
                     const imptext = document.createElement("div");
-                    imptext.innerText = "To use your saved addresses, enter the OTP sent to +" + mycountrycodearr[2] + phone;
+                    imptext.innerText = "To use your saved addresses, enter the OTP sent to +" + mycountrycodearr[2] + customer_phone_global;
                     imptext.className = 'imptext';
                     verifymobilenumbertext.appendChild(imptext);
                     const otparea = document.createElement("div");
@@ -329,7 +415,8 @@
                     const address = resp.address;
                     
                     alert(resp.message);
-                    addressframe(email, phone, countrycode, customername, amount, address);
+                    addresses_global = address;
+                    addressframe(amount);
                 }
                 else{
                     alert(resp.message);
@@ -343,6 +430,8 @@
                     getskipbtn.className = 'button-8';
                     getskipbtn.innerText = "Skip";
                     getskipbtn.onclick = async () => {
+                        
+                        edit_add_address(undefined, amount);
                     }
                     otparea.appendChild(getotp);
                     otparea.appendChild(getotpbtn);
@@ -358,6 +447,7 @@
                 }
                 else{
 
+                    edit_add_address(undefined, amount);
 
                 }
                
@@ -365,10 +455,10 @@
 
             }
 
-            async function addressframe(email,phone, countrycode, customername, amount, address) {
+            async function addressframe(amount) {
 
-                console.log(email+" " + phone+" " + countrycode+ " " + customername+ " " + amount+ " " + address);
-                const mycountrycodearr = countrycode.split(" ");
+            
+                const mycountrycodearr = customer_country_code_global.split(" ");
                 console.log(mycountrycodearr);
                 const thisform = document.getElementById('frame1');
                 thisform.style.display = 'none';
@@ -391,37 +481,60 @@
                 profile.appendChild(profileimg);
                 const profileName = document.createElement("div");
                 profileName.className = 'payment-profile-name';
-                profileName.innerText = email;
+                profileName.innerText = customer_email_global;
                 const profileEmail = document.createElement("div");
                 profileEmail.className = 'payment-profile-email';
     
-                profileEmail.innerText = phone;
+                profileEmail.innerText = customer_phone_global;
                 profile.appendChild(profileName);
                 profile.appendChild(profileEmail);
                 thisform2.appendChild(profile);
                 const addresscontainer = document.createElement("div");
                 
-                for(let i=0;i<address.length;i++){
+                for(let i=0;i<addresses_global.length;i++){
                     const addressbox = document.createElement("div");
                     addressbox.className = 'address-box';
-                    addressbox.setAttribute('id', address[i]._id);
+                    
                     const addressboxtext = document.createElement("div");
                     addressboxtext.className = 'address-box-text';
-                    
+                    let fetchaddress = await fetch(`http://localhost:3000/addresses/`+addresses_global[i].id, {});
+                    fetchaddress = (await fetchaddress.json());
 
-                    addressboxtext.innerText = address[i].Address1 + "," + address[i].Address2+ "," + address[i].City + ", "+ address[i].State + ", " +address[i].Country + ", "+ address[i].PinCode;
+                    addressboxtext.innerText = fetchaddress.line_1 + ", " + fetchaddress.line_2 + ", " + fetchaddress.city + ", " + fetchaddress.state + ", " + fetchaddress.country + ", " + fetchaddress.zip;
 
-
+                    addressbox.setAttribute('id', addresses_global[i]._id);
 
                     const addressboxbtn = document.createElement("button");
                     
                     addressboxbtn.className = 'button-8';
                     addressboxbtn.innerText = "Select";
                     addressboxbtn.onclick = (() => {
-                        console.log(address[i]._id);
+                        console.log(addresses_global[i]._id);
 
-                        overview(email, phone, countrycode, customername, amount, address[i]._id, address[i].Address1, address[i].Address2, address[i].City, address[i].State, address[i].Country, address[i].PinCode, address);
+                        customer_billing_name_global = fetchaddress.name;
+
+                        
+                        customer_billing_phone_global = fetchaddress.phone_number;
+                        
+                        customer_billing_addressline1_global = fetchaddress.line_1;
+
+                        customer_billing_addressline2_global = fetchaddress.line_2;
+
+                        customer_billing_city_global = fetchaddress.city;
+
+                        customer_billing_state_global = fetchaddress.state;
+
+                        customer_billing_country_global = fetchaddress.country;
+
+                        customer_billing_zip_global = fetchaddress.zip;
+
+
+
+                        
+                        // overview(email, phone, countrycode, customername, amount, fetchaddress.id, fetchaddress.line_1, fetchaddress.line_2, fetchaddress.city, fetchaddress.state, fetchaddress.country, fetchaddress.zip, address);
                         // secondframe(email, phone, countrycode, customername, amount, address[i]._id, address[i].Address1, address[i].Address2, address[i].City, address[i].State, address[i].Country, address[i].PinCode, address);
+                        customer_address_global_id = fetchaddress.id;
+                        overview(amount);
                     });
                     const editaddressbtn = document.createElement("button");
                     editaddressbtn.className = 'button-8';
@@ -433,27 +546,20 @@
                     deleteaddressboxbtn.className = 'button-62';
                     deleteaddressboxbtn.innerText = "Delete";
                     deleteaddressboxbtn.onclick = (() => {
-                        let headersList = {
-                            "Content-Type": "application/json"
-                           }
+                        
+                            addressbox.classList.add('address-box-delete');
                            
-                           let bodyContent = JSON.stringify({
-                               "phone" : mycountrycodearr[2]+phone,
-                               "id" : address[i]._id
-                           });
-                           
-                           fetch("https://rapyduser.herokuapp.com/deleteAddress", { 
-                             method: "POST",
-                             body: bodyContent,
-                             headers: headersList
-                           }).then(function(response) {
+                           fetch(`https://rapidapiv2.herokuapp.com/customerid/${customer_id}/deleteaddr/${address[i]._id}`, {}).then(function(response) {
                             
                              const deletedarea = document.getElementById(address[i]._id);
                              deletedarea.remove();
+                             addressbox.classList.remove('address-box-delete');
                              return response.text();
+                             
                            }).then(function(data) {
                              console.log(data);
                            })
+
 
                     });
                     
@@ -475,9 +581,8 @@
 
             }
 
-            async function overview(email, phone, countrycode, customername, amount, addressid, address1, address2, city, state, country, pin, addresses) {
-
-                console.log(email+" " + phone+" " + countrycode+ " " + customername+ " " + amount+ " " + addressid+ " " + address1+ " " + address2+ " " + city+ " " + state+ " " + country+ " " + pin + " " + addresses);
+            async function overview(amount) {
+                console.log(customer_address_global_id);
                 const thisform = document.getElementById('frame1');
                 thisform.style.display = 'none';
                 const thisform2 = document.getElementById('frame2');
@@ -485,6 +590,9 @@
                 while(thisform2.firstChild){
                     thisform2.removeChild(thisform2.firstChild);
                 }
+
+                let fetchcoupons = await fetch(`http://localhost:3000/list/coupons`, {});
+                fetchcoupons = (await fetchcoupons.json());
                const contactdetails = document.createElement("div");
                 contactdetails.className = 'contact-details';
                 const contactdetailstextwrapper = document.createElement("div");
@@ -531,7 +639,7 @@
                 email_providedfavicon.innerHTML = '<i class="fa-solid fa-envelope"></i>';
                 const email_providedname = document.createElement("div");
                 email_providedname.className = 'email-provided-name';
-                email_providedname.innerText = email;
+                email_providedname.innerText = customer_email_global;
                 email_providedtext.appendChild(email_providedfavicon);
                 email_providedtext.appendChild(email_providedname);
                 email_provided.appendChild(email_providedtext);
@@ -547,7 +655,7 @@
                 phone_providedfavicon.innerHTML = '<i class="fa-solid fa-phone"></i>';
                 const phone_providedname = document.createElement("div");
                 phone_providedname.className = 'phone-provided-name';
-                phone_providedname.innerText = phone;
+                phone_providedname.innerText = customer_phone_global;
                 phone_providedtext.appendChild(phone_providedfavicon);
                 phone_providedtext.appendChild(phone_providedname);
                 phone_provided.appendChild(phone_providedtext);
@@ -586,10 +694,8 @@
                 address_header_edit_button.className = 'button-8';
                 address_header_edit_button.innerText = "Edit / Change";
                 address_header_edit_button.onclick = (() => {
-                    const thisform = document.getElementById('frame1');
-                    thisform.style.display = 'block';
-                    const thisform2 = document.getElementById('frame2');
-                    thisform2.style.display = 'none';
+                    
+                    edit_add_address(amount);
                 });
 
                 address_header_edit.appendChild(address_header_edit_button);
@@ -603,7 +709,7 @@
               
                 const address_line_1 = document.createElement("div");
                 address_line_1.className = 'address-line-1';
-                address_line_1.innerHTML = address1 + ", " + address2;
+                address_line_1.innerHTML = customer_billing_name_global + ", " +customer_billing_addressline1_global + ", " + customer_billing_addressline2_global;
 
                 
 
@@ -611,22 +717,22 @@
                 address_line_3_container.style = 'display:flex;justify-content:space-between;';
                 const address_line_3 = document.createElement("div");
                 address_line_3.className = 'address-line-3';
-                address_line_3.innerHTML = "City: " + city;
+                address_line_3.innerHTML = "City: " + customer_billing_city_global;
 
                 const address_line_4 = document.createElement("div");
                 address_line_4.className = 'address-line-4';
-                address_line_4.innerHTML = "State: " + state;
+                address_line_4.innerHTML = "State: " + customer_billing_state_global;
 
                 const address_line_5_wrapper = document.createElement("div");
                 address_line_5_wrapper.style = 'display:flex;justify-content:space-between;';
 
                 const address_line_5 = document.createElement("div");
                 address_line_5.className = 'address-line-5';
-                address_line_5.innerHTML = "Country: " + country;
+                address_line_5.innerHTML = "Country: " + customer_billing_country_global;
 
                 const address_line_6 = document.createElement("div");
                 address_line_6.className = 'address-line-6';
-                address_line_6.innerHTML = "Pin: " + pin;
+                address_line_6.innerHTML = "Pin: " + customer_billing_zip_global;
 
                 address_line_5_wrapper.appendChild(address_line_5);
                 address_line_5_wrapper.appendChild(address_line_6);
@@ -635,11 +741,17 @@
                 address_line_3_container.appendChild(address_line_3);
                 address_line_3_container.appendChild(address_line_4);
 
+                const address_line_7 = document.createElement("div");
+                address_line_7.className = 'address-line-7';
+                address_line_7.innerHTML = "Billing Number: " + customer_billing_phone_global;
+
+
 
                 address_complete.appendChild(address_line_1);
                
                 address_complete.appendChild(address_line_3_container);
                 address_complete.appendChild(address_line_5_wrapper);
+                address_complete.appendChild(address_line_7);
 
 
                 
@@ -649,6 +761,27 @@
                 
                 address_provided_wrapper.appendChild(address_header);
                 address_provided_wrapper.appendChild(address_complete);
+
+                const coupons_wrapper = document.createElement("div");
+                coupons_wrapper.className = 'coupons-wrapper';
+
+                const coupons_inner_wrapper = document.createElement("div");
+                coupons_inner_wrapper.className = 'coupons-inner-wrapper';
+                const coupons_discount = document.createElement("div");
+                coupons_discount.className = 'coupons-discount';
+                coupons_discount.innerHTML = '<i class="fa-solid fa-tag"></i>';
+                const coupons_discount_text = document.createElement("div");
+                coupons_discount_text.className = 'coupons-discount-text';
+                coupons_discount_text.innerHTML = "Have a coupon? <span class='gray-coupons'> ( "+fetchcoupons.coupons+" Available )</span>";
+                const rightarrow = document.createElement("div");
+                rightarrow.className = 'rightarrow';
+                rightarrow.innerHTML = '<i class="fa-solid fa-angle-right"></i>';
+                coupons_inner_wrapper.appendChild(coupons_discount);
+                coupons_inner_wrapper.appendChild(coupons_discount_text);
+                
+                coupons_wrapper.appendChild(coupons_inner_wrapper);
+                coupons_wrapper.appendChild(rightarrow);
+
 
 
 
@@ -716,10 +849,10 @@
                 paybutton.id = 'absbtn';
                 paybutton.innerText = "Pay";
                 paybutton.onclick = (() => {
-                    const thisform = document.getElementById('frame1');
-                    thisform.style.display = 'none';
-                    const thisform2 = document.getElementById('frame2');
-                    thisform2.style.display = 'block';
+                  secondframe(amount);
+                  
+                  
+                
                 }
                 );
 
@@ -729,9 +862,12 @@
                 order_details.appendChild(discount_container);
                 order_details.appendChild(final_container);
                 order_wrapper.appendChild(order_details);
+
                 
 
-
+                coupons_wrapper.onclick = (() => {
+                    coupons_frame(amount);
+                });
 
 
 
@@ -745,17 +881,411 @@
 
                 thisform2.appendChild(contactdetails);
                 thisform2.appendChild(address_provided_wrapper);
+                thisform2.appendChild(coupons_wrapper);
                 thisform2.appendChild(order_wrapper);
                 thisform2.appendChild(paybutton);
               
             }
 
+            async function coupons_frame(amount){
 
 
-            async function secondframe(email, phone, countrycode, customername, amount) {
+                const thisform = document.getElementById('frame1');
+                thisform.style.display = 'none';
+                const thisform2 = document.getElementById('frame2');
+                thisform2.style.display = 'block';
+                while(thisform2.firstChild){
+                    thisform2.removeChild(thisform2.firstChild);
+                }
                 
-                const mycountrycodearr = countrycode.split(" ");
-                console.log(email+" " + phone+" " + mycountrycodearr[0]+ " " + mycountrycodearr[1]+ " " + customername+ " " + amount);
+                const coupons_wrapper_parent = document.createElement("div");
+                coupons_wrapper_parent.className = 'coupons_wrapper_parent';
+
+                const coupons_header_wrapper = document.createElement("div");
+                coupons_header_wrapper.className = 'coupons_header_wrapper';
+                const coupons_header = document.createElement("div");
+                coupons_header.className = 'coupons-header';
+                coupons_header_icon = document.createElement("div");
+                coupons_header_icon.className = 'coupons-header-icon';
+                coupons_header_icon.innerHTML = '<i class="fa-solid fa-tag"></i>';
+                coupons_header_text = document.createElement("div");
+                coupons_header_text.className = 'coupons-header-text';
+                coupons_header_text.innerText = "Available Coupons";
+                coupons_header.appendChild(coupons_header_icon);
+                coupons_header.appendChild(coupons_header_text);
+
+                
+                const back_to_overview_btn = document.createElement("button");
+                back_to_overview_btn.className = 'button-8';
+                back_to_overview_btn.innerText = "Back";
+                back_to_overview_btn.onclick = (() => {
+                    
+                    overview(amount);
+                });
+                coupons_header_wrapper.appendChild(coupons_header);
+                coupons_header_wrapper.appendChild(back_to_overview_btn);
+
+                const coupons_lists = document.createElement("div");
+                coupons_lists.className = 'coupons-lists';
+                
+
+                const coupons_list_child = document.createElement("div");
+                coupons_list_child.className = 'coupons-list-child';
+                
+                
+                const coupons_list_child_text = document.createElement("div");
+                coupons_list_child_text.className = 'coupons-list-child-text';
+                coupons_list_child_text.innerText = "Coupon Code";
+                const coupons_list_child_value = document.createElement("div");
+                coupons_list_child_value.className = 'coupons-list-child-value';
+                coupons_list_child_value.innerText = "Use code " + "ABCD";
+                const coupons_list_child_date = document.createElement("div");
+                coupons_list_child_date.className = 'coupons-list-child-date';
+                coupons_list_child_date.innerText = "Valid Till";
+                coupons_list_child.appendChild(coupons_list_child_text);
+                coupons_list_child.appendChild(coupons_list_child_value);
+                coupons_list_child.appendChild(coupons_list_child_date);
+                coupons_lists.appendChild(coupons_list_child);
+
+                coupons_wrapper_parent.appendChild(coupons_header_wrapper);
+                coupons_wrapper_parent.appendChild(coupons_lists);
+
+                thisform2.appendChild(coupons_wrapper_parent);
+                
+
+
+
+            }
+
+
+            async function edit_add_address(amount) {
+          
+                const thisform = document.getElementById('frame1');
+                thisform.style.display = 'none';
+                const thisform2 = document.getElementById('frame2');
+                thisform2.style.display = 'block';
+
+                
+                while(thisform2.firstChild) {
+                    thisform2.removeChild(thisform2.firstChild);
+                }
+                var countriesdata = countriesdata_global;
+               
+                
+
+                
+                const address_wrapper = document.createElement("div");
+                address_wrapper.className = 'address-wrapper';
+                const address_header = document.createElement("div");
+                address_header.className = 'address-header';
+                
+                const address_title_icon = document.createElement("div");
+                address_title_icon.className = 'address-title-icon';
+                const address_icon = document.createElement("div");
+                address_icon.className = 'address-icon';
+                address_icon.innerHTML = '<i class="fas fa-map-marker-alt"></i> ';
+
+                const address_title = document.createElement("div");
+                address_title.className = 'address-title';
+                address_title.innerText = "Delivery Address";
+
+                address_title_icon.appendChild(address_icon);
+                address_title_icon.appendChild(address_title);
+                
+                const address_change_btn = document.createElement("div");
+                address_change_btn.className = 'address-change-btn';
+                
+                const back_btn = document.createElement("button");
+                back_btn.className = 'button-8';
+                back_btn.innerText = "Back";
+                
+
+                address_change_btn.appendChild(back_btn);
+
+                address_header.appendChild(address_title_icon);
+                address_header.appendChild(address_change_btn);
+
+
+                const address_form = document.createElement("form");
+
+                const billing_name_wrapper = document.createElement("div");
+                billing_name_wrapper.className = 'billing-name-wrapper';
+
+                const billing_name = document.createElement("input");
+                billing_name.className = 'Billing-Name';
+                billing_name.placeholder="Billing Name";
+                billing_name.type = "text";
+                billing_name.value = customer_name_global;
+
+                billing_name_wrapper.appendChild(billing_name);
+
+                const billing_phone_wrapper = document.createElement("div");
+                billing_phone_wrapper.className = 'billing-phone-wrapper';
+                
+
+                const billing_phone_country_code = document.createElement("select");
+                billing_phone_country_code.className = 'billing-phone-country-code';
+                
+
+                 for(var i=0;i<countrycodeslist.length;i++) {
+                    var iterator = document.createElement("option");
+                    if(countrycodeslist[i].phone_code == 91){
+    
+                        iterator.setAttribute("selected", "selected");
+                    }
+                    iterator.value = countrycodeslist[i].phone_code;
+                    iterator.text = countrycodeslist[i].phone_code;
+                    billing_phone_country_code.appendChild(iterator);
+                }
+                // billing_phone_country_code.value = customer_country_code_global
+                
+                const billing_phone = document.createElement("input");
+                billing_phone.className = 'billing-phone';
+                billing_phone.placeholder="Billing Phone Number";
+                billing_phone.type = "text";
+                billing_phone.value = customer_phone_global;
+
+                billing_phone_wrapper.appendChild(billing_phone_country_code);
+                billing_phone_wrapper.appendChild(billing_phone);
+
+
+
+                
+
+                const country_pin_wrapper = document.createElement("div");
+                country_pin_wrapper.className = 'country_pin_wrapper';
+                
+                const countryinput = document.createElement("select");
+                countryinput.className = 'countryinput';
+                loadingOverlay.classList.remove('hide');
+               
+                console.log(countriesdata.body.data);
+                countrycodeslist = countriesdata.body.data;
+
+                for(var i=0;i<countrycodeslist.length;i++) {
+                    var iterator = document.createElement("option");
+                    if(countrycodeslist[i].phone_code == 91){
+    
+                        iterator.setAttribute("selected", "selected");
+                    }
+                    iterator.value = countrycodeslist[i].iso_alpha2;
+                    iterator.text = countrycodeslist[i].iso_alpha2;
+                    countryinput.appendChild(iterator);
+                }
+                
+               
+                loadingOverlay.classList.add('hide');
+
+                const pininput = document.createElement("input");
+                pininput.className = 'pininput';
+                pininput.placeholder="Pin Code";
+
+                country_pin_wrapper.appendChild(countryinput);
+                country_pin_wrapper.appendChild(pininput);
+
+                const city_state_wrapper = document.createElement("div");
+                city_state_wrapper.className = 'city_state_wrapper';
+                const cityinput = document.createElement("input");
+                cityinput.className = 'cityinput';
+                cityinput.placeholder="City";
+                const stateinput = document.createElement("input");
+                stateinput.className = 'stateinput';
+                stateinput.placeholder="State";
+                city_state_wrapper.appendChild(cityinput);
+                city_state_wrapper.appendChild(stateinput);
+
+
+                const full_address_wrapper = document.createElement("div");
+                full_address_wrapper.className = 'full_address_wrapper';
+                const address1input = document.createElement("textarea");
+                address1input.className = 'address1input';
+                address1input.placeholder="House Number, Apartment*";
+                const address2input = document.createElement("textarea");
+                address2input.className = 'address2input';
+                address2input.placeholder="Area, Colony, Street, Sector*";
+                full_address_wrapper.appendChild(address1input);
+                full_address_wrapper.appendChild(address2input);
+
+
+             
+                const save_address_permission = document.createElement("div");
+                save_address_permission.className = 'save_address_permission';
+                const save_address_permission_checkbox = document.createElement("input");
+                save_address_permission_checkbox.className = 'save_address_permission_checkbox';
+                save_address_permission_checkbox.type = "checkbox";
+                save_address_permission_checkbox.id = "save_address_permission_checkbox";
+                const save_address_permission_label = document.createElement("label");
+                save_address_permission_label.className = 'save_address_permission_label';
+                save_address_permission_label.htmlFor = "save_address_permission_checkbox";
+                save_address_permission_label.innerText = "Save this address for future use";
+                save_address_permission.appendChild(save_address_permission_checkbox);
+                save_address_permission.appendChild(save_address_permission_label);
+                const address_submit_btn = document.createElement("button");
+                if(customer_address_global_id==null || customer_address_global_id=="" || customer_address_global_id==undefined){
+
+                    back_btn.onclick = (() => {
+                        console.log("back button clicked");
+                        const thisform = document.getElementById('frame1');
+                          thisform.style.display = 'block';
+                         const thisform2 = document.getElementById('frame2');
+                         thisform2.style.display = 'none';
+
+                    
+                    });
+                    address_submit_btn.className = 'pay-button';
+                    address_submit_btn.id = 'absbtn';
+                    address_submit_btn.innerText = "Add Address and Continue";
+                    address_submit_btn.onclick = (async () => {
+                       
+                        customer_billing_name_global = billing_name.value;
+                        
+                        customer_billing_countrycode_global = billing_phone_country_code.value;
+                        customer_billing_phone_global = customer_billing_countrycode_global+ billing_phone.value;
+                        customer_billing_addressline1_global = address1input.value;
+                        customer_billing_addressline2_global = address2input.value;
+                        customer_billing_country_global = countryinput.value;
+                        customer_billing_state_global = stateinput.value;
+                        customer_billing_city_global = cityinput.value;
+                        customer_billing_zip_global = pininput.value;
+    
+                        if(save_address_permission_checkbox.checked){
+                            
+                                      
+                        const savethisaddress = await fetch(`http://localhost:3000/save/address/${customer_id_global}`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                            
+                                "name": customer_billing_name_global,
+                                "line_1": customer_billing_addressline1_global,
+                                "line_2": customer_billing_addressline2_global,
+                                "country": customer_billing_country_global,
+                                "state": customer_billing_state_global,
+                                "city": customer_billing_city_global,
+                                "zip": customer_billing_zip_global,
+                                "phone_number": customer_billing_phone_global,
+                                "metadata": {
+                                    "merchant_defined": true
+                                }
+                            })
+                        });
+                        const savethisaddress_json = await savethisaddress.json();
+
+                        console.log(savethisaddress_json);
+
+                        alert("Address Saved");
+
+                        customer_address_global_id = savethisaddress_json.body.id;
+
+                        }
+                    
+                       
+    
+    
+                        overview(amount);
+                        
+                     
+    
+    
+                    });
+
+
+                }else{
+                    back_btn.onclick = (() => {
+                        overview(amount);
+                        
+                    });
+                address_submit_btn.className = 'pay-button';
+                address_submit_btn.id = 'absbtn';
+                address_submit_btn.innerText = "Update Address and Continue";
+                address_submit_btn.onclick = (async () => {
+                   
+                    customer_billing_name_global = billing_name.value;
+                        
+                    customer_billing_countrycode_global = billing_phone_country_code.value;
+                    customer_billing_phone_global = customer_billing_countrycode_global+ billing_phone.value;
+                    customer_billing_addressline1_global = address1input.value;
+                    customer_billing_addressline2_global = address2input.value;
+                    customer_billing_country_global = countryinput.value;
+                    customer_billing_state_global = stateinput.value;
+                    customer_billing_city_global = cityinput.value;
+                    customer_billing_zip_global = pininput.value;
+
+                    if(save_address_permission_checkbox.checked){
+              
+                        const savethisaddress = await fetch(`http://localhost:3000/save/address/${customer_id_global}`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                            
+                                "name": customer_billing_name_global,
+                                "line_1": customer_billing_addressline1_global,
+                                "line_2": customer_billing_addressline2_global,
+                                "country": customer_billing_country_global,
+                                "state": customer_billing_state_global,
+                                "city": customer_billing_city_global,
+                                "zip": customer_billing_zip_global,
+                                "phone_number": customer_billing_phone_global,
+                                "metadata": {
+                                    "merchant_defined": true
+                                }
+                            })
+                        });
+                        const savethisaddress_json = await savethisaddress.json();
+                        customer_address_global_id = savethisaddress_json.body.id;
+                        console.log(savethisaddress_json);
+
+                        alert("Address Saved");
+
+
+                    }
+                
+
+
+
+                    overview(amount);
+
+
+                });
+
+            }
+
+                address_form.appendChild(billing_name_wrapper);
+                address_form.appendChild(billing_phone_wrapper);
+                address_form.appendChild(country_pin_wrapper);
+                address_form.appendChild(city_state_wrapper);   
+               
+                address_form.appendChild(full_address_wrapper);
+                address_form.appendChild(save_address_permission);
+                
+
+
+
+                address_wrapper.appendChild(address_header);
+
+                address_wrapper.appendChild(address_form);
+                
+                thisform2.appendChild(address_wrapper);
+                thisform2.appendChild(address_submit_btn);
+                
+
+
+
+
+
+
+
+            }
+
+
+            async function secondframe(amount) {
+                console.log(amount);
+                const mycountrycodearr = customer_country_code_global.split(" ");
+              
                 var payment_methods_arr=[];
                 console.log("Proceeding");
                 while(secondcontainer.firstChild){
@@ -766,10 +1296,7 @@
                 const profile = document.createElement("div");
                 profile.className = 'payment-profile';
                 profile.onclick = (() => {
-                    const thisform = document.getElementById('frame1');
-                    thisform.style.display = 'block';
-                    const thisform2 = document.getElementById('frame2');
-                    thisform2.style.display = 'none';
+                    overview(amount);
                     });
                 const profileimg = document.createElement("div");
                 profileimg.innerHTML = '<i class="fa-solid fa-pen-to-square"></i>';
@@ -777,11 +1304,11 @@
                 profile.appendChild(profileimg);
                 const profileName = document.createElement("div");
                 profileName.className = 'payment-profile-name';
-                profileName.innerText = email;
+                profileName.innerText = customer_email_global;
                 const profileEmail = document.createElement("div");
                 profileEmail.className = 'payment-profile-email';
     
-                profileEmail.innerText = phone;
+                profileEmail.innerText = mycountrycodearr[2] +customer_phone_global;
                 profile.appendChild(profileName);
                 profile.appendChild(profileEmail);
                 secondcontainer.appendChild(profile);
@@ -800,7 +1327,70 @@
 
 
                 payment_methods_names_X =["Card", "eWallet", "Cash", "Bank Transfer", "Bank Redirect"];
-                
+
+                console.log(customer_id_global);
+                    var url_store = `http://localhost:3000/customer/${customer_id_global}/paymentmethods`;
+                    let stored_paymet_methods = await fetch(url_store);
+                    const stored_paymet_methods_json = await stored_paymet_methods.json();
+
+
+
+                    console.log(stored_paymet_methods_json.payment_methods);
+                    
+                    const prefferedpayments = document.createElement("div");
+                    prefferedpayments.className = 'payment-methods-preffered';
+                    
+                    const prefferedpayments_left_wrapper = document.createElement("div");
+                    prefferedpayments_left_wrapper.className = 'payment-methods-preffered-left-wrapper';
+
+
+
+                    const prefferedpayments_icon = document.createElement("div");
+                    prefferedpayments_icon.innerHTML = '<img src="'+stored_paymet_methods_json.payment_methods[0].image+'" alt="">';
+                    prefferedpayments_icon.className = 'payment-methods-preffered-icon';
+                    prefferedpayments.appendChild(prefferedpayments_icon);
+                    const prefferedpayments_text = document.createElement("div");
+                    prefferedpayments_text.className = 'payment-methods-preffered-text';
+                    
+                    
+
+                    const optiontitle = document.createElement("div");
+                    optiontitle.className = 'payment-methods-preffered-text';
+
+                    const optiontitle_card_name = document.createElement("div");
+                    optiontitle_card_name.className = 'payment-methods-preffered-text-card-name';
+                    optiontitle_card_name.innerText = stored_paymet_methods_json.payment_methods[0].name;
+                    optiontitle.appendChild(optiontitle_card_name);
+                    const optiontitle_card_number = document.createElement("div");
+
+                    optiontitle_card_number.className = 'payment-methods-preffered-text-card-number';
+                    optiontitle_card_number.innerText = "Ending with "+ stored_paymet_methods_json.payment_methods[0].last4;
+                    optiontitle.appendChild(optiontitle_card_number);
+
+                    const optiontitle_card_expiry = document.createElement("div");
+                    optiontitle_card_expiry.className = 'payment-methods-preffered-text-card-expiry';
+                    optiontitle_card_expiry.innerText = stored_paymet_methods_json.payment_methods[0].expiration_month+"/"+stored_paymet_methods_json.payment_methods[0].expiration_year; 
+                    optiontitle.appendChild(optiontitle_card_expiry);
+
+                    prefferedpayments_left_wrapper.appendChild(prefferedpayments_icon);
+                    prefferedpayments_left_wrapper.appendChild(optiontitle);
+
+
+
+
+                    const prefferedpayments_right_wrapper = 
+                    prefferedpayments.appendChild(prefferedpayments_left_wrapper);
+                    
+                    
+
+
+
+
+                    prefferedpayments.appendChild(prefferedpayments_text);
+                    paymentmethodsContainer.appendChild(prefferedpayments);
+
+        
+
                 for (var i = 0; i < payment_methods_names_X.length; i++) {
                    let name = payment_methods_names_X[i];
                    console.log(name);
@@ -817,7 +1407,7 @@
                         const thisform3 = document.getElementById('frame3');
                         thisform3.style.display = 'block';
 
-                        thirdframe(name,mycountrycodearr[0], card_store, eWallet_store, Cash_store, Bank_Transfer_store, Bank_Redirect_store, email, phone, customername, mycountrycodearr[1], amount);
+                        thirdframe(name,mycountrycodearr[0], card_store, eWallet_store, Cash_store, Bank_Transfer_store, Bank_Redirect_store, mycountrycodearr[1], amount);
                         }
                     );
 
@@ -827,7 +1417,7 @@
                 
             }
             loadingOverlay.classList.remove('hide');
-            const paymentmethods = await request('http://localhost:3000/FetchPaymentMethods/'+mycountrycodearr[0], "GET", {});
+            const paymentmethods = await request('http://localhost:3000/FetchPaymentMethods/'+ mycountrycodearr[0], "GET", {});
             let card_store = [];
             let eWallet_store = [];
             let Cash_store = [];
@@ -864,7 +1454,7 @@
             }
 
 
-            async function thirdframe(payment_methods_name, countrycode, card_store, eWallet_store, Cash_store, Bank_Transfer_store, Bank_Redirect_store, email, phone, customername, currency, amount) {
+            async function thirdframe(payment_methods_name, countrycode, card_store, eWallet_store, Cash_store, Bank_Transfer_store, Bank_Redirect_store, currency, amount) {
                 console.log(countrycode+ " " +currency);
                
                
@@ -908,7 +1498,7 @@
                     loaderspecific_methods.innerHTML = '<img src="'+element.image+'" alt="" class="payment-card-image-load">';
                     loaderspecific_methods.onclick = (() => {
                         
-                        forthframe(payment_methods_name, email, phone, name, customername, countrycode, currency, amount);
+                        forthframe(payment_methods_name, name, countrycode, currency, amount);
                     });
                     paymentmethods_cards_load.appendChild(loaderspecific_methods);
                                
@@ -939,7 +1529,7 @@
 
             }
 
-            async function forthframe(payment_methods_name, email, phone, paymentid, customername, countrycode, currency, amount) {
+            async function forthframe(payment_methods_name, paymentid, countrycode, currency, amount) {
 
                 const thisform = document.getElementById('frame1');
                 thisform.style.display = 'none';
@@ -952,7 +1542,7 @@
                 while(forthcontainer.firstChild){
                     forthcontainer.removeChild(forthcontainer.firstChild);
                 }
-                    console.log(payment_methods_name+ " " + email + " " + phone + " " + paymentid + " " + customername + " " + countrycode + " " + currency + " " + amount);
+                    console.log(payment_methods_name+ " " + customer_email_global + " " + customer_phone_global + " " + paymentid + " " + customer_name_global + " " + countrycode + " " + currency + " " + amount);
                     const backbtn = document.createElement("div");
                     backbtn.className = 'back-button';
                     
@@ -986,7 +1576,7 @@
                                 "country": countrycode,
                                 "currency": currency,
                                 // "requested_currency": "USD",
-                               
+                                "customer": customer_id_global,
                                 "error_payment_url": "http://example.com/error",
                                 "merchant_reference_id": "950ae8c6-78",
                                 "language": "en",
