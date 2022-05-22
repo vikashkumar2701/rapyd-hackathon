@@ -6,7 +6,8 @@
         this.keyId = keyId;
         this.onSuccess = onSuccess;
         this.onFailure = onFailure;
-        this.customer = customer || {};
+        customer = customer || {};
+
         console.log(this.customer);
         this.themeColor = themeColor || "#EC4899";
         addresses_global = [];
@@ -1665,7 +1666,7 @@
 
 
                                     },
-                                    "orders": this.customer
+                                    "orders": customer
 
                                 },
                                
