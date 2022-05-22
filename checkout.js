@@ -1664,7 +1664,8 @@
                                         
 
 
-                                    }
+                                    },
+                                    "orders": this.customer
 
                                 },
                                
