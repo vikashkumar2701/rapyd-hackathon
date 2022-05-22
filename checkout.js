@@ -7,6 +7,7 @@
         this.onSuccess = onSuccess;
         this.onFailure = onFailure;
         this.customer = customer || {};
+        console.log(this.customer);
         this.themeColor = themeColor || "#EC4899";
         addresses_global = [];
         countriesdata_global = [];
@@ -318,7 +319,7 @@
                             console.log("customer created");
                             customer_id = create_customer.body.data.id;
                             customer_id_global = customer_id;
-                            const savetodatabase = await request('https://sykmj6ydmf.execute-api.us-east-1.amazonaws.com/dev/save/customer', "POST", {
+                            const savetodatabase = await request('save/customer', "POST", {
                                 
                                     "name" : create_customer.body.data.name,
                                     "email" : create_customer.body.data.email,
