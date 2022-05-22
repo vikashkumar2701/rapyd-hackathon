@@ -1,3 +1,4 @@
+
 (function () {
     
     function MockPay({amount, keyId, onSuccess, onFailure, customer, themeColor}) {
@@ -25,7 +26,7 @@
         customer_billing_city_global = "";
         customer_billing_zip_global = "";
 
-        customer_id_global = "cus_e5159c41ba6fb1eb4e339bfbdff2a44d";
+        customer_id_global = "";
 
         customer_address_global_id = "";
 
@@ -200,7 +201,7 @@
 
            async function getCountryCodes() {
             loadingOverlay.classList.remove('hide');
-            const txn = await request('http://localhost:3000/countries', "GET", {});
+            const txn = await request('https://sykmj6ydmf.execute-api.us-east-1.amazonaws.com/dev/countries', "GET", {});
             countriesdata_global = txn; 
             console.log(txn.body.data);
             countrycodeslist = txn.body.data;
@@ -262,10 +263,10 @@
                 customer_country_code_global = countrycode.value;
 
                 // edit_add_address(emailinput.value,customernameinput.value,countrycode.value,phone.value, this.amount, addresses);
-                // afterfirstframe(this.amount);
+                afterfirstframe(this.amount);
                 // coupons_frame(this.amount);
                 // overview(emailinput.value, phone.value, countrycode.value, customernameinput.value, this.amount);
-                secondframe(this.amount);
+                // secondframe(this.amount);
             }
 
 
@@ -286,7 +287,7 @@
                 }
                 else{
 
-                    const create_customer = await request('http://localhost:3000/create/customer', "POST", {
+                    const create_customer = await request('https://sykmj6ydmf.execute-api.us-east-1.amazonaws.com/dev/create/customer', "POST", {
                         
     
                             "email": customer_email_global,
@@ -302,7 +303,7 @@
                             console.log("customer created");
                             customer_id = create_customer.body.data.id;
                             customer_id_global = customer_id;
-                            const savetodatabase = await request('https://rapidapiv2.herokuapp.com/save/customer', "POST", {
+                            const savetodatabase = await request('https://sykmj6ydmf.execute-api.us-east-1.amazonaws.com/dev/save/customer', "POST", {
                                 
                                     "name" : create_customer.body.data.name,
                                     "email" : create_customer.body.data.email,
@@ -337,7 +338,7 @@
                     thisform2.removeChild(thisform2.firstChild);
                 }
                 loadingOverlay.classList.remove('hide');
-                const sendOtp = await request('http://localhost:3000/sendotp/'+ mycountrycodearr[2] +'/number/'+ customer_phone_global + '/customerid/' + customer_id_global, "GET", {});
+                const sendOtp = await request('https://sykmj6ydmf.execute-api.us-east-1.amazonaws.com/dev/sendotp/'+ mycountrycodearr[2] +'/number/'+ customer_phone_global + '/customerid/' + customer_id_global, "GET", {});
                 loadingOverlay.classList.add('hide');
                 const accesskey = sendOtp.token;
                 console.log(accesskey);
@@ -366,7 +367,7 @@
                 thisform2.appendChild(profile);
                 
                 
-                let check_if_address_exist = await fetch(`http://localhost:3000/checkifexist/${customer_id_global}`);
+                let check_if_address_exist = await fetch(`https://sykmj6ydmf.execute-api.us-east-1.amazonaws.com/dev/checkifexist/${customer_id_global}`);
 
                 check_if_address_exist = await check_if_address_exist.json();
                 console.log(check_if_address_exist.status);
@@ -408,7 +409,7 @@
                     redirect: 'follow'
                     };
 
-                let resp = await fetch("http://localhost:3000/verifyotp", requestOptions)
+                let resp = await fetch("https://sykmj6ydmf.execute-api.us-east-1.amazonaws.com/dev/verifyotp", requestOptions)
                 resp = await resp.json();
                 console.log(resp.status);
                 if(resp.status==="true"){
@@ -497,7 +498,7 @@
                     
                     const addressboxtext = document.createElement("div");
                     addressboxtext.className = 'address-box-text';
-                    let fetchaddress = await fetch(`http://localhost:3000/addresses/`+addresses_global[i].id, {});
+                    let fetchaddress = await fetch(`https://sykmj6ydmf.execute-api.us-east-1.amazonaws.com/dev/addresses/`+addresses_global[i].id, {});
                     fetchaddress = (await fetchaddress.json());
 
                     addressboxtext.innerText = fetchaddress.line_1 + ", " + fetchaddress.line_2 + ", " + fetchaddress.city + ", " + fetchaddress.state + ", " + fetchaddress.country + ", " + fetchaddress.zip;
@@ -591,8 +592,11 @@
                     thisform2.removeChild(thisform2.firstChild);
                 }
 
-                let fetchcoupons = await fetch(`http://localhost:3000/list/coupons`, {});
+                let fetchcoupons = await fetch(`https://sykmj6ydmf.execute-api.us-east-1.amazonaws.com/dev/list/coupons`, {});
                 fetchcoupons = (await fetchcoupons.json());
+
+                const overviewwrapper = document.createElement("div");
+                overviewwrapper.className = 'overview-wrapper';
                const contactdetails = document.createElement("div");
                 contactdetails.className = 'contact-details';
                 const contactdetailstextwrapper = document.createElement("div");
@@ -877,12 +881,11 @@
 
 
 
-
-
-                thisform2.appendChild(contactdetails);
-                thisform2.appendChild(address_provided_wrapper);
-                thisform2.appendChild(coupons_wrapper);
-                thisform2.appendChild(order_wrapper);
+                overviewwrapper.appendChild(contactdetails);
+                overviewwrapper.appendChild(address_provided_wrapper);
+                overviewwrapper.appendChild(coupons_wrapper);
+                overviewwrapper.appendChild(order_wrapper);
+                thisform2.appendChild(overviewwrapper);
                 thisform2.appendChild(paybutton);
               
             }
@@ -1151,7 +1154,7 @@
                         if(save_address_permission_checkbox.checked){
                             
                                       
-                        const savethisaddress = await fetch(`http://localhost:3000/save/address/${customer_id_global}`, {
+                        const savethisaddress = await fetch(`https://sykmj6ydmf.execute-api.us-east-1.amazonaws.com/dev/save/address/${customer_id_global}`, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -1215,7 +1218,7 @@
 
                     if(save_address_permission_checkbox.checked){
               
-                        const savethisaddress = await fetch(`http://localhost:3000/save/address/${customer_id_global}`, {
+                        const savethisaddress = await fetch(`https://sykmj6ydmf.execute-api.us-east-1.amazonaws.com/dev/save/address/${customer_id_global}`, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -1288,6 +1291,15 @@
               
                 var payment_methods_arr=[];
                 console.log("Proceeding");
+                const thisform = document.getElementById('frame1');
+                thisform.style.display = 'none';
+                const thisform2 = document.getElementById('frame2');
+                thisform2.style.display = 'block';
+                const thisform3 = document.getElementById('frame3');
+                thisform3.style.display = 'none';
+                const thisform4 = document.getElementById('frame4');
+                thisform4.style.display = 'none';
+
                 while(secondcontainer.firstChild){
                     secondcontainer.removeChild(secondcontainer.firstChild);
                 }
@@ -1329,7 +1341,7 @@
                 payment_methods_names_X =["Card", "eWallet", "Cash", "Bank Transfer", "Bank Redirect"];
 
                 console.log(customer_id_global);
-                    var url_store = `http://localhost:3000/customer/${customer_id_global}/paymentmethods`;
+                    var url_store = `https://sykmj6ydmf.execute-api.us-east-1.amazonaws.com/dev/customer/${customer_id_global}/paymentmethods`;
                     let stored_paymet_methods = await fetch(url_store);
                     const stored_paymet_methods_json = await stored_paymet_methods.json();
 
@@ -1337,87 +1349,100 @@
 
                     console.log(stored_paymet_methods_json.payment_methods);
                     
-                    const prefferedpayments = document.createElement("div");
-                    prefferedpayments.className = 'payment-methods-preffered';
-                    
-                    const prefferedpayments_left_wrapper = document.createElement("div");
-                    prefferedpayments_left_wrapper.className = 'payment-methods-preffered-left-wrapper';
 
+                    for(let i=0;i<stored_paymet_methods_json.payment_methods.length && stored_paymet_methods_json.payment_methods[i].category=="card";i++){
+                        const prefferedpayments = document.createElement("div");
+                        prefferedpayments.className = 'payment-methods-preffered';
+                        
+                        const prefferedpayments_left_wrapper = document.createElement("div");
+                        prefferedpayments_left_wrapper.className = 'payment-methods-preffered-left-wrapper';
+    
+    
+    
+                        const prefferedpayments_icon = document.createElement("div");
+                        prefferedpayments_icon.innerHTML = '<img src="'+stored_paymet_methods_json.payment_methods[i].image+'" alt="">';
+                        prefferedpayments_icon.className = 'payment-methods-preffered-icon';
+                        prefferedpayments.appendChild(prefferedpayments_icon);
+                        const prefferedpayments_text = document.createElement("div");
+                        prefferedpayments_text.className = 'payment-methods-preffered-text';
+                        
+                        
+    
+                        const optiontitle = document.createElement("div");
+                        optiontitle.className = 'payment-methods-preffered-text';
+    
+                        const optiontitle_card_name = document.createElement("div");
+                        optiontitle_card_name.className = 'payment-methods-preffered-text-card-name';
+                        optiontitle_card_name.innerText = stored_paymet_methods_json.payment_methods[i].name;
+                        optiontitle.appendChild(optiontitle_card_name);
+                        const optiontitle_card_number = document.createElement("div");
+    
+                        optiontitle_card_number.className = 'payment-methods-preffered-text-card-number';
+                        optiontitle_card_number.innerText = "**** **** **** "+ stored_paymet_methods_json.payment_methods[0].last4;
+                        optiontitle.appendChild(optiontitle_card_number);
+    
+                        const optiontitle_card_expiry = document.createElement("div");
+                        optiontitle_card_expiry.className = 'payment-methods-preffered-text-card-expiry';
+                        optiontitle_card_expiry.innerText = stored_paymet_methods_json.payment_methods[i].expiration_month+"/"+stored_paymet_methods_json.payment_methods[0].expiration_year; 
+                        optiontitle.appendChild(optiontitle_card_expiry);
+    
+                        prefferedpayments_left_wrapper.appendChild(prefferedpayments_icon);
+                        prefferedpayments_left_wrapper.appendChild(optiontitle);
+    
+    
+    
+    
+                        const prefferedpayments_right_wrapper = document.createElement("button");
+                        prefferedpayments_right_wrapper.className = 'button-8';
+                        prefferedpayments_right_wrapper.innerText = "Pay Now";
+                        prefferedpayments_right_wrapper.onclick = (() => {
+                            let thisframe = function (){
 
+                                secondframe(amount);
+                            }
+                            forthframe( stored_paymet_methods_json.payment_methods[i].type, mycountrycodearr[0], mycountrycodearr[1], amount, thisframe);
+                        });
 
-                    const prefferedpayments_icon = document.createElement("div");
-                    prefferedpayments_icon.innerHTML = '<img src="'+stored_paymet_methods_json.payment_methods[0].image+'" alt="">';
-                    prefferedpayments_icon.className = 'payment-methods-preffered-icon';
-                    prefferedpayments.appendChild(prefferedpayments_icon);
-                    const prefferedpayments_text = document.createElement("div");
-                    prefferedpayments_text.className = 'payment-methods-preffered-text';
-                    
-                    
+    
+                        prefferedpayments.appendChild(prefferedpayments_left_wrapper);
+                        prefferedpayments.appendChild(prefferedpayments_right_wrapper);
+                        
+                        
+    
+    
+    
+    
+                        prefferedpayments.appendChild(prefferedpayments_text);
+                        paymentmethodsContainer.appendChild(prefferedpayments);
+                    }
+              
 
-                    const optiontitle = document.createElement("div");
-                    optiontitle.className = 'payment-methods-preffered-text';
-
-                    const optiontitle_card_name = document.createElement("div");
-                    optiontitle_card_name.className = 'payment-methods-preffered-text-card-name';
-                    optiontitle_card_name.innerText = stored_paymet_methods_json.payment_methods[0].name;
-                    optiontitle.appendChild(optiontitle_card_name);
-                    const optiontitle_card_number = document.createElement("div");
-
-                    optiontitle_card_number.className = 'payment-methods-preffered-text-card-number';
-                    optiontitle_card_number.innerText = "Ending with "+ stored_paymet_methods_json.payment_methods[0].last4;
-                    optiontitle.appendChild(optiontitle_card_number);
-
-                    const optiontitle_card_expiry = document.createElement("div");
-                    optiontitle_card_expiry.className = 'payment-methods-preffered-text-card-expiry';
-                    optiontitle_card_expiry.innerText = stored_paymet_methods_json.payment_methods[0].expiration_month+"/"+stored_paymet_methods_json.payment_methods[0].expiration_year; 
-                    optiontitle.appendChild(optiontitle_card_expiry);
-
-                    prefferedpayments_left_wrapper.appendChild(prefferedpayments_icon);
-                    prefferedpayments_left_wrapper.appendChild(optiontitle);
-
-
-
-
-                    const prefferedpayments_right_wrapper = 
-                    prefferedpayments.appendChild(prefferedpayments_left_wrapper);
-                    
-                    
-
-
-
-
-                    prefferedpayments.appendChild(prefferedpayments_text);
-                    paymentmethodsContainer.appendChild(prefferedpayments);
-
-        
+                    const all_active_payment_methods = document.createElement("div");
+                    all_active_payment_methods.className = 'payment-methods-all-active';
 
                 for (var i = 0; i < payment_methods_names_X.length; i++) {
                    let name = payment_methods_names_X[i];
                    console.log(name);
                      window['p'+i]= document.createElement("div");
-                     window['p'+i].className = 'payment-methods-cards';
+                     window['p'+i].className = 'payment-methods-cards button-58';
                      window['p'+i].id= name;
                      window['p'+i].innerHTML = payment_methods_names_X[i];
-                    paymentmethodsContainer.appendChild( window['p'+i]);
+                     all_active_payment_methods.appendChild( window['p'+i]);
                     window['p'+i].onclick = (() => {
-                        const thisform = document.getElementById('frame1');
-                        thisform.style.display = 'none';
-                        const thisform2 = document.getElementById('frame2');
-                        thisform2.style.display = 'none';
-                        const thisform3 = document.getElementById('frame3');
-                        thisform3.style.display = 'block';
+                     
 
                         thirdframe(name,mycountrycodearr[0], card_store, eWallet_store, Cash_store, Bank_Transfer_store, Bank_Redirect_store, mycountrycodearr[1], amount);
                         }
                     );
 
                 }
+                paymentmethodsContainer.appendChild(all_active_payment_methods);
                 secondcontainer.appendChild(paymentmethodsContainer);
               
                 
             }
             loadingOverlay.classList.remove('hide');
-            const paymentmethods = await request('http://localhost:3000/FetchPaymentMethods/'+ mycountrycodearr[0], "GET", {});
+            const paymentmethods = await request('https://sykmj6ydmf.execute-api.us-east-1.amazonaws.com/dev/FetchPaymentMethods/'+ mycountrycodearr[0], "GET", {});
             let card_store = [];
             let eWallet_store = [];
             let Cash_store = [];
@@ -1446,24 +1471,26 @@
             loadingOverlay.classList.add('hide');
             
            
-            const thisform = document.getElementById('frame1');
-            thisform.style.display = 'none';
-            const thisform2 = document.getElementById('frame2');
-            thisform2.style.display = 'block';
+           
 
             }
 
 
             async function thirdframe(payment_methods_name, countrycode, card_store, eWallet_store, Cash_store, Bank_Transfer_store, Bank_Redirect_store, currency, amount) {
-                console.log(countrycode+ " " +currency);
-               
-               
+                    
+                const thisform = document.getElementById('frame1');
+                thisform.style.display = 'none';
+                const thisform2 = document.getElementById('frame2');
+                thisform2.style.display = 'none';
+                const thisform3 = document.getElementById('frame3');
+                thisform3.style.display = 'block';
+                const thisform4 = document.getElementById('frame4');
+                thisform4.style.display = 'none';
 
-
-                console.log(payment_methods_name);
-               
-                
-                console.log(payment_methods_name);
+                while(thisform3.firstChild){
+                    thisform3.removeChild(thisform3.firstChild);
+                }
+            
                 var payment_methods_arr_load = [];
                 if(payment_methods_name=="Card"){
                     payment_methods_arr_load = card_store;
@@ -1486,7 +1513,7 @@
                 paymentmethods_cards_load.className = 'payment-methods-cards-load';
                 
                 
-
+                if(payment_methods_arr_load.length!=0){
                 payment_methods_arr_load.forEach(element => {
                     
                     let name = element.type;
@@ -1498,16 +1525,23 @@
                     loaderspecific_methods.innerHTML = '<img src="'+element.image+'" alt="" class="payment-card-image-load">';
                     loaderspecific_methods.onclick = (() => {
                         
-                        forthframe(payment_methods_name, name, countrycode, currency, amount);
+                        let thisframe = function (){
+
+                            thirdframe(payment_methods_name, countrycode, card_store, eWallet_store, Cash_store, Bank_Transfer_store, Bank_Redirect_store, currency, amount);
+                        }
+                        forthframe(name, countrycode, currency, amount, thisframe);
                     });
                     paymentmethods_cards_load.appendChild(loaderspecific_methods);
                                
 
                     console.log(element);
                 });
-                 while (thirdcontainer.firstChild) {
-                    thirdcontainer.removeChild(thirdcontainer.firstChild);
-                 }
+            }
+            else{
+
+                paymentmethods_cards_load.innerHTML = '<div class="payment-methods-cards-load-text">No payment methods available</div>';
+            }
+            
                  const backbtn = document.createElement("div");
                  backbtn.className = 'back-button';
                  
@@ -1521,6 +1555,7 @@
                      thisform2.style.display = 'block';
                      const thisform3 = document.getElementById('frame3');
                      thisform3.style.display = 'none';
+
                  });
                  thirdcontainer.appendChild(backbtn);
                 thirdcontainer.appendChild(paymentmethods_cards_load);
@@ -1529,7 +1564,7 @@
 
             }
 
-            async function forthframe(payment_methods_name, paymentid, countrycode, currency, amount) {
+            async function forthframe(paymentid, countrycode, currency, amount, backframe) {
 
                 const thisform = document.getElementById('frame1');
                 thisform.style.display = 'none';
@@ -1539,10 +1574,9 @@
                 thisform3.style.display = 'none';
                 const thisform4 = document.getElementById('frame4');
                 thisform4.style.display = 'block';
-                while(forthcontainer.firstChild){
-                    forthcontainer.removeChild(forthcontainer.firstChild);
+                while(thisform4.firstChild){
+                    thisform4.removeChild(thisform4.firstChild);
                 }
-                    console.log(payment_methods_name+ " " + customer_email_global + " " + customer_phone_global + " " + paymentid + " " + customer_name_global + " " + countrycode + " " + currency + " " + amount);
                     const backbtn = document.createElement("div");
                     backbtn.className = 'back-button';
                     
@@ -1550,19 +1584,20 @@
                     
                     backbtn.style.backgroundColor = this.themeColor;
                     backbtn.onclick = (() => {
-                        const thisform = document.getElementById('frame1');
-                        thisform.style.display = 'none';
-                        const thisform2 = document.getElementById('frame2');
-                        thisform2.style.display = 'none';
-                        const thisform3 = document.getElementById('frame3');
-                        thisform3.style.display = 'block';
-                        const thisform4 = document.getElementById('frame4');
-                        thisform4.style.display = 'none';
+                        backframe();
                     });
+
+                    
+
+                    thisform4.appendChild(backbtn);
+                   
+                   
+                   
+
                    
                     let currentepochtime =  Math.floor( new Date().getTime() / 1000 )+5000;
                     console.log(currentepochtime);
-                    let sendpostrequest = await fetch('http://localhost:3000/checkout', {
+                    let sendpostrequest = await fetch('https://sykmj6ydmf.execute-api.us-east-1.amazonaws.com/dev/checkout', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
@@ -1581,8 +1616,23 @@
                                 "merchant_reference_id": "950ae8c6-78",
                                 "language": "en",
                                 "metadata": {
-                                    "merchant_defined": true
+                                    "merchant_defined": true,
+                                    "address": {
+                                        "billing_name": customer_billing_name_global,
+                                        "billing_address_line_1": customer_billing_addressline1_global,
+                                        "billing_address_line_2": customer_billing_addressline2_global,
+                                        "billing_city": customer_billing_city_global,
+                                        "billing_state": customer_billing_state_global,
+                                        "billing_country": customer_billing_country_global,
+                                        "billing_postal_code": customer_billing_zip_global,
+                                        "billing_phone": customer_billing_phone_global,
+                                        
+
+
+                                    }
+
                                 },
+                               
                                 "payment_method_types_include": [
                                     paymentid
                                 ],
@@ -1593,14 +1643,34 @@
                     });
                     const json_start_checkout = await sendpostrequest.json();
                     console.log(json_start_checkout.body);
+                    let checkout = new RapydCheckoutToolkit({
+                        pay_button_text: "Click to pay",
+                              // Text that appears on the 'Pay' button. 
+                              // String. Maximum length is 16 characters.
+                              // Default is "Place Your Order". Optional. 
+                        pay_button_color: "blue",
+                              // Color of the 'Pay' button. String.
+                              // Standard CSS color name or hexadecimal code such as #323fff.
+                              // Default is the color that is returned in the 'merchant_color'
+                              // field of the response to 'Create Checkout Page'. Optional.
+                        id: json_start_checkout.body.data.id,
+                              // ID of the 'Create Checkout Page' response. String. Required.
+                        close_on_complete: true,
+                              // Causes the embedded Rapyd Checkout Toolkit window to close
+                              // when the payment is complete. Boolean. Default is 'true'. Optional.           
+                        page_type: "collection"
+                             // Default is "collection". Optional.
+                    });
+                    checkout.displayCheckout();
+                    
 
-                    window.open(json_start_checkout.body.data.redirect_url, "popup", "width=500,height=500");
-                    const fetchrequiredfields = await request('http://localhost:3000/requiredfields/'+paymentid, "GET", {});
+                    document.getElementById('mockpay_root').remove();
 
-                    console.log(fetchrequiredfields.body.data);
-                    forthcontainer.appendChild(backbtn);
+                    // window.open(json_start_checkout.body.data.redirect_url, "popup", "width=500,height=500");
+                   
                     loadingOverlay.classList.remove('hide');
-                    pollTransactionStatus(json_start_checkout.body.data.id);
+                    // const checking = await pollTransactionStatus(json_start_checkout.body.data.id);
+                    // console.log(checking);
                     // forthcontainer.appendChild(checkout_iframe);
                     loadingOverlay.classList.add('hide');
 
@@ -1609,50 +1679,6 @@
 
 
 
-
-            const payButton = document.createElement("button")
-            payButton.innerText = 'Pay Now';
-            payButton.className = 'pay-button';
-            payButton.style.backgroundColor = this.themeColor;
-
-            // convert rgb values from hex to decimal
-            const r = parseInt(this.themeColor.slice(1, 3), 16);
-            const g = parseInt(this.themeColor.slice(3, 5), 16);
-            const b = parseInt(this.themeColor.slice(5, 8), 16);
-
-            // calculate brightness of the color
-            const luminosity = (r * 0.299 + g * 0.587 + b * 0.114);
-
-            if (luminosity > 186) {
-                payButton.style.color = 'black';
-            } else {
-                payButton.style.color = 'white';
-            }
-            payButton.onclick = async () => {
-                const cardNumber = cardNumberInput.value.replace(/\s/g, '');
-                if (cardNumber.length < 16 || expiryInput.value.length < 5 || cvvInput.value.length < 3 || nameInput.value.length === 0) {
-                    return;
-                }
-                loadingOverlay.classList.remove('hide');
-                try {
-                    const txn = await request('https://domain.com/transactions/initiate/', "POST", {
-                        "amount": this.amount,
-                        "api_key": this.keyId,
-                        "customer": this.customer
-                    });
-                    window.open(txn.authorization_url, '_blank');
-                    const data = await pollTransactionStatus(txn["txn_id"], this.keyId);
-                    if (data["status"] === "success") {
-                        this.onSuccess(data);
-                    } else {
-                        this.onFailure(data);
-                    }
-                } catch (e) {
-                    this.onFailure(e);
-                } finally {
-                    document.getElementById('mockpay_root').remove();
-                }
-            }
 
             const gapDiv = document.createElement("div");
             gapDiv.className = "flex-1";
@@ -1721,7 +1747,6 @@
             overlay.appendChild(paymentCardWrapper);
             body.appendChild(overlay);
 
-            cardNumberInput.autofocus = true;
         }
     }
 
@@ -1758,6 +1783,7 @@
                             console.log("I am here");
                             clearInterval(poll);
                             resolve(body.body.data.payment);
+                            
                             
                         }
                     }

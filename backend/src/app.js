@@ -15,6 +15,7 @@
  * @requires https
  * @requires crypto-js
  */
+ const serverless = require('serverless-http');
  const https = require('https');
 const express = require('express');
 var jwt = require('jsonwebtoken');
@@ -37,7 +38,7 @@ var salt = "";
 app.get('/FetchPaymentMethods/:countryname', async (req, res) => {
 
     var countryname = req.params.countryname;
-    console.log(countryname);
+    // console.log(countryname);
     try {
         const result = await makeRequest('GET', '/v1/payment_methods/country?country='+countryname);
     
@@ -68,7 +69,7 @@ app.get('/payment', async (req, res) => {
 
 app.get('/countries', async (req, res) => {
     
-    console.log("fetching countries");
+    // console.log("fetching countries");
     try {   
         const result = await makeRequest('GET', '/v1/data/countries');
         res.json(result);
@@ -81,7 +82,7 @@ app.get('/countries', async (req, res) => {
 
 app.get('/requiredfields/:payment_id', async (req, res) => {
     var payment_id = req.params.payment_id;
-    console.log(payment_id);
+    // console.log(payment_id);
     try {
         const result = await makeRequest('GET', '/v1/payment_methods/required_fields/'+payment_id);
         // Message body absent/'+payment_id);
@@ -94,7 +95,7 @@ app.get('/requiredfields/:payment_id', async (req, res) => {
 app.post('/checkout', async (req, res) => {
     
     let body = req.body;
-    console.log(body);
+    // console.log(body);
     try{
 
         const result = await makeRequest('POST', '/v1/checkout', body);
@@ -109,11 +110,11 @@ app.post('/checkout', async (req, res) => {
 
 app.get("/checkout/:checkoutid", async (req, res) => {
     let checkoutid = req.params.checkoutid;
-    console.log(checkoutid);
+    // console.log(checkoutid);
     try {
         const result = await makeRequest('GET', '/v1/checkout/'+checkoutid);
        
-        console.log(result);
+        // console.log(result);
         res.send(result);
     } catch (error) {
         res.send(error);
@@ -122,7 +123,7 @@ app.get("/checkout/:checkoutid", async (req, res) => {
 
 app.post("/create/customer", async (req, res) => {
     let body = req.body;
-    console.log(body);
+    // console.log(body);
     try {
         const result = await makeRequest('POST', '/v1/customers', body);
         
@@ -172,7 +173,7 @@ app.get("/checkifexist/:customer_id", async (req, res) => {
     let customer_id = req.params.customer_id;
 
     await axios.get('https://rapidapiv2.herokuapp.com/checkif/address/'+customer_id).then(function(response){
-      console.log(response.data.data);
+    //   console.log(response.data.data);
 
       if(response.data.data.length>=1){
         const resp = {
@@ -208,8 +209,9 @@ app.get("/sendotp/:countrycode/number/:phonenumber/customerid/:customerid", asyn
         // console.log(countrycode);
         // console.log(phonenumber);
         salt = await bcrypt.genSalt(6);
-        const otp = Math.floor(Math.random() * 1000000).toString();
-        console.log(otp);
+        // const otp = Math.floor(Math.random() * 1000000).toString();
+        const otp = "123456";
+        // console.log(otp);
         const encryptedotp = await bcrypt.hash(otp, salt);
         const token = jwt.sign({
             "otp": encryptedotp,
@@ -252,12 +254,12 @@ app.post("/verifyotp", async (req, res) => {
     try{
     const decoded = jwt.verify(token, 'secret');
     
-    console.log(decoded);
+
     
     // const userotp = await bcrypt.hash(otp, salt);
     const checkotp = await bcrypt.compare(otp, decoded.otp);
     const getaddress = await axios.get(`https://rapidapiv2.herokuapp.com/checkif/address/${decoded.customerid}`);
-    console.log(getaddress.data.data);
+    
     if(checkotp){
         
         const response = {
@@ -321,7 +323,7 @@ app.post("/save/address/:customerid", async (req, res) => {
     
     try{
     const response = await makeRequest('POST', '/v1/addresses', body);
-    console.log(response.body.data);
+    // console.log(response.body.data);
     const resp  = {
         "status": "true",
         "address_id": response.body.data.id,
@@ -330,7 +332,7 @@ app.post("/save/address/:customerid", async (req, res) => {
     "customer_id": customerid,
     "address_id": response.body.data.id        
     });
-    console.log(savetodatabase.data);
+    
     res.status(200).json(resp);
     }
     catch(error){
@@ -348,7 +350,7 @@ app.get("/list/coupons", async (req, res) => {
 
     try{
     const response = await makeRequest('GET', '/v1/coupons');
-    console.log(response.body.data);
+    // console.log(response.body.data);
     const resp  = {
         "status": "true",
         "coupons": response.body.data.length,
@@ -370,7 +372,7 @@ app.get("/customer/:customerid/paymentmethods", async (req, res) => {
     let customerid = req.params.customerid;
     try{
     const response = await makeRequest('GET', '/v1/customers/'+customerid+'/payment_methods');
-    console.log(response.body.data);
+    // console.log(response.body.data);
     const resp  = {
         "status": "true",
         "payment_methods": response.body.data
@@ -386,3 +388,7 @@ app.get("/customer/:customerid/paymentmethods", async (req, res) => {
     }
 
 });
+
+
+	
+module.exports.handler = serverless(app);

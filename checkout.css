@@ -260,11 +260,75 @@ margin:8px;
         box-shadow: rgba(9, 30, 66, 0.25) 0px 1px 1px, rgba(9, 30, 66, 0.13) 0px 0px 1px 1px;
         }
 
+
+
+/* CSS */
+.button-58 {
+  align-items: center;
+  background-color: #06f;
+  border: 2px solid #06f;
+  box-sizing: border-box;
+  color: #fff;
+  cursor: pointer;
+  display: inline-flex;
+  fill: #000;
+  font-family: Inter,sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  height: 48px;
+  justify-content: center;
+  letter-spacing: -.8px;
+  line-height: 24px;
+  min-width: 140px;
+  outline: 0;
+  padding: 0 17px;
+  text-align: center;
+  text-decoration: none;
+  transition: all .3s;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+}
+
+.button-58:focus {
+  color: #171e29;
+}
+
+.button-58:hover {
+  background-color: #3385ff;
+  border-color: #3385ff;
+  fill: #06f;
+}
+
+.button-58:active {
+  background-color: #3385ff;
+  border-color: #3385ff;
+  fill: #06f;
+}
+
+@media (min-width: 768px) {
+  .button-58 {
+    min-width: 170px;
+  }
+}
+
+.payment-methods-all-active{
+
+display: flex;
+flex-direction: column;
+}
+.payment-methods-all-active::first-line ::before{
+
+content: "asdsd";
+}
+     
+
         .payment-methods-cards{
          
             box-shadow: rgba(27, 31, 35, 0.04) 0px 1px 0px, rgba(255, 255, 255, 0.25) 0px 1px 0px inset;
-            margin:20px;
+            margin:10px;
             padding:20px;
+
         }
 
         .payment-methods-cards:hover{
@@ -289,7 +353,7 @@ margin:8px;
         #frame2{
 
             overflow-y: auto;
-            margin-bottom: 20%;
+            
         
         }
 
@@ -367,6 +431,8 @@ margin:8px;
             justify-content: center;
             align-items: center;
             width:43%;
+            box-shadow: rgba(0, 0, 0, 0.1) 0px 0px 5px 0px, rgba(0, 0, 0, 0.1) 0px 0px 1px 0px;
+            box-shadow: rgba(0, 0, 0, 0.05) 0px 0px 0px 1px, rgb(209, 213, 219) 0px 0px 0px 1px inset;
         }
         .payment-icon:hover{
             box-shadow: rgba(6, 24, 44, 0.4) 0px 0px 0px 2px, rgba(6, 24, 44, 0.65) 0px 4px 6px -1px, rgba(255, 255, 255, 0.08) 0px 1px 0px inset;
@@ -646,11 +712,12 @@ font-weight: 600;
 
 }
 
-.address-wrapper{
+.address-wrapper, .overview-wrapper{
 
-    margin:2px;
+    margin-bottom:20%;
    
 }
+
 
 .address-header {
     display:flex;
@@ -856,9 +923,15 @@ width:40px;
     margin: 10px;
     font-size: 13px;
   
-    cursor: pointer;
+    
     align-items: center;
     background-color: rgba(98, 172, 255, 0.06);
+    box-shadow: rgba(33, 35, 38, 0.1) 0px 10px 10px -10px;
+    box-shadow: rgba(17, 17, 26, 0.1) 0px 0px 16px;
+    box-shadow: rgba(0, 0, 0, 0.18) 0px 2px 4px;
+    display: flex;
+    justify-content: space-between;
+
 
 }
 
@@ -878,4 +951,43 @@ flex-direction: column;
 
 .payment-methods-preffered-icon{
 padding:10px;
+}
+
+
+
+.payment-methods-cards-load-text{
+
+margin: 50% auto;
+font-size: 13px;
+color: gray;
+font-weight: 600;
+
+
+
+}
+
+.payment-loader-checker{
+
+margin-top:30%;
+
+text-align: center;
+
+}
+
+.payment-loader-checker > div{
+
+
+margin: 0px auto;
+font-size: 18px;
+color: gray;
+margin:0px auto;
+
+
+}
+
+#rapyd-checkout {
+
+    position: absolute;top: 0px;background: #ffffffc2;width: 100%;display: flex;backdrop-filter: blur(47px);/* background: center; */margin: 0px auto;/* box-shadow: rgba(50, 50, 93, 0.25) 0px 50px 100px -20px, rgba(0, 0, 0, 0.3) 0px 30px 60px -30px, rgba(10, 37, 64, 0.35) 0px -2px 6px 0px inset; */
+    
+
 }

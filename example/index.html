@@ -50,26 +50,47 @@
             }
         }
     </script>
-<!-- 
+
+ 
+
     <script>
-        let checkout = new RapydCheckoutToolkit({
-    pay_button_text: "Click to pay",
-          // Text that appears on the 'Pay' button. 
-          // String. Maximum length is 16 characters.
-          // Default is "Place Your Order". Optional. 
-    pay_button_color: "blue",
-          // Color of the 'Pay' button. String.
-          // Standard CSS color name or hexadecimal code such as #323fff.
-          // Default is the color that is returned in the 'merchant_color'
-          // field of the response to 'Create Checkout Page'. Optional.
-    id: "checkout_611dbfc0597a4cd0660d6d88a3b6a174",
-          // ID of the 'Create Checkout Page' response. String. Required.
-    close_on_complete: false,
-          // Causes the embedded Rapyd Checkout Toolkit window to close
-          // when the payment is complete. Boolean. Default is 'true'. Optional.           
-    page_type: "collection"
-         // Default is "collection". Optional.
-});
-    </script> -->
+                window.addEventListener('onCheckoutPaymentSuccess', function (event) {
+            console.log(event.detail);
+            feedback(event);
+        });
+        window.addEventListener('onCheckoutFailure', function (event) {
+            console.log(event.detail.error);
+            feedback(event);
+        });
+        window.addEventListener('onCheckoutPaymentFailure', (event)=> {
+            console.log(event.detail.error);
+            feedback(event);
+        })
+
+
+        // display information to the user
+        function feedback(event){
+            if (event.detail.error){
+                document.getElementById('title').textContent = "Whoops!";
+                document.getElementById('message').innerHTML = "We cannot process your payment:<br/>" + 
+                    event.detail.error;
+                document.getElementById('image').src = "img/no-bike.svg";
+                document.getElementById('action').textContent = "Try again";
+            }
+            else {
+                document.getElementById('title').textContent = "Success!";
+                document.getElementById('message').innerHTML = "Thank you! Your product is on its way!" + 
+                    "<br>" +
+                    "Order: " + event.detail.metadata.sales_order;
+                document.getElementById('image').src = "img/logo.svg";
+                document.getElementById('action').textContent = "Home";
+            }
+
+            document.getElementById('action').href = "bike.html";
+            document.getElementById('feedback').style.display = "block";
+        }
+   
+        
+    </script>
 </body>
 </html>
