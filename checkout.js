@@ -41,7 +41,7 @@
         customer_address_global_id = getCookie("customer_address_global_id")?getCookie("customer_address_global_id"):"";
 
 
-
+        
 
 
 
@@ -68,8 +68,6 @@
     }
 
     MockPay.prototype.open = function () {
-
-    
         const body = document.getElementsByTagName('body')[0];
 
         const overlayExists = !!document.getElementById('mockpay_root');
@@ -285,8 +283,6 @@
                 // overview(emailinput.value, phone.value, countrycode.value, customernameinput.value, this.amount);
                 // secondframe(this.amount);
             }
-
-
 
 
             async function afterfirstframe(amount) {
@@ -1784,14 +1780,6 @@
             
             overlay.appendChild(paymentCardWrapper);
             body.appendChild(overlay);
-
-
-            
-            if(getCookie("customer_id")!="" && getCookie("customer_email")!="" && getCookie("customer_name")!="" && getCookie("customer_phone")!="" && getCookie("customer_country_code")!="" && getCookie("customer_billing_name")!="" && getCookie("customer_billing_phone")!="" && getCookie("customer_billing_countrycode")!="" && getCookie("customer_billing_addressline1")!="" && getCookie("customer_billing_addressline2")!="" && getCookie("customer_billing_country")!="" && getCookie("customer_billing_state")!="" && getCookie("customer_billing_city")!="" && getCookie("customer_billing_zip")!=""){
-            
-
-                overview(this.amount);
-            }
 
         }
     }
