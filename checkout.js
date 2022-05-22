@@ -11,24 +11,39 @@
         addresses_global = [];
         countriesdata_global = [];
         
-        customer_name_global = "";
-        customer_email_global = "";
-        customer_phone_global = "";
-        customer_country_code_global = "";
+        customer_name_global = getCookie("customer_name")?getCookie("customer_name"):"";
+        customer_email_global = getCookie("customer_email")?getCookie("customer_email"):"";
 
-        customer_billing_name_global ="";
-        customer_billing_phone_global = "";
-        customer_billing_countrycode_global = "";
-        customer_billing_addressline1_global = "";
-        customer_billing_addressline2_global = "";
-        customer_billing_country_global = "";
-        customer_billing_state_global = "";
-        customer_billing_city_global = "";
-        customer_billing_zip_global = "";
+        customer_phone_global = getCookie("customer_phone")?getCookie("customer_phone"):"";
+        customer_country_code_global = getCookie("customer_country_code")?getCookie("customer_country_code"):"";
 
-        customer_id_global = "";
+        customer_billing_name_global = getCookie("customer_billing_name")?getCookie("customer_billing_name"):"";
 
-        customer_address_global_id = "";
+        customer_billing_phone_global = getCookie("customer_billing_phone")?getCookie("customer_billing_phone"):"";
+        customer_billing_countrycode_global = getCookie("customer_billing_countrycode")?getCookie("customer_billing_countrycode"):"";
+
+        customer_billing_addressline1_global = getCookie("customer_billing_addressline1")?getCookie("customer_billing_addressline1"):"";
+
+        customer_billing_addressline2_global = getCookie("customer_billing_addressline2")?getCookie("customer_billing_addressline2"):"";
+
+        customer_billing_country_global = getCookie("customer_billing_country")?getCookie("customer_billing_country"):"";
+
+        customer_billing_state_global = getCookie("customer_billing_state")?getCookie("customer_billing_state"):"";
+
+        customer_billing_city_global = getCookie("customer_billing_city")?getCookie("customer_billing_city"):"";
+
+        customer_billing_zip_global = getCookie("customer_billing_zip")?getCookie("customer_billing_zip"):"";
+
+
+        customer_id_global = getCookie("customer_id")?getCookie("customer_id"):"";
+
+
+        customer_address_global_id = getCookie("customer_address_global_id")?getCookie("customer_address_global_id"):"";
+
+
+
+
+
 
 
 
@@ -53,6 +68,8 @@
     }
 
     MockPay.prototype.open = function () {
+
+    
         const body = document.getElementsByTagName('body')[0];
 
         const overlayExists = !!document.getElementById('mockpay_root');
@@ -268,6 +285,8 @@
                 // overview(emailinput.value, phone.value, countrycode.value, customernameinput.value, this.amount);
                 // secondframe(this.amount);
             }
+
+
 
 
             async function afterfirstframe(amount) {
@@ -583,6 +602,25 @@
             }
 
             async function overview(amount) {
+
+                setCookie('cookie_customer_name', customer_name_global ,7);
+                setCookie('cookie_customer_email', customer_email_global ,7);
+                setCookie('cookie_customer_phone', customer_phone_global ,7);
+                setCookie('cookie_customer_country_code', customer_country_code_global ,7);
+                setCookie('cookie_customer_address_id', customer_address_global_id ,7);
+                setCookie('cookie_customer_billing_name', customer_billing_name_global ,7);
+                setCookie('cookie_customer_billing_phone', customer_billing_phone_global ,7);
+                setCookie('cookie_customer_billing_addressline1', customer_billing_addressline1_global ,7);
+                setCookie('cookie_customer_billing_addressline2', customer_billing_addressline2_global ,7);
+                setCookie('cookie_customer_billing_city', customer_billing_city_global ,7);
+                setCookie('cookie_customer_billing_state', customer_billing_state_global ,7);
+                setCookie('cookie_customer_billing_country', customer_billing_country_global ,7);
+                setCookie('cookie_customer_billing_zip', customer_billing_zip_global ,7);
+                
+                setCookie('cookie_customer_id', customer_id_global ,7);
+                setCookie('cookie_customer_address_id', customer_address_global_id ,7);
+
+
                 console.log(customer_address_global_id);
                 const thisform = document.getElementById('frame1');
                 thisform.style.display = 'none';
@@ -1747,6 +1785,14 @@
             overlay.appendChild(paymentCardWrapper);
             body.appendChild(overlay);
 
+
+            
+            if(getCookie("customer_id")!="" && getCookie("customer_email")!="" && getCookie("customer_name")!="" && getCookie("customer_phone")!="" && getCookie("customer_country_code")!="" && getCookie("customer_billing_name")!="" && getCookie("customer_billing_phone")!="" && getCookie("customer_billing_countrycode")!="" && getCookie("customer_billing_addressline1")!="" && getCookie("customer_billing_addressline2")!="" && getCookie("customer_billing_country")!="" && getCookie("customer_billing_state")!="" && getCookie("customer_billing_city")!="" && getCookie("customer_billing_zip")!=""){
+            
+
+                overview(this.amount);
+            }
+
         }
     }
 
@@ -1794,6 +1840,32 @@
             }, 3000);
         })
     }
+
+    function setCookie(name,value,days) {
+        var expires = "";
+        if (days) {
+            var date = new Date();
+            date.setTime(date.getTime() + (days*24*60*60*1000));
+            expires = "; expires=" + date.toUTCString();
+        }
+        document.cookie = name + "=" + (value || "")  + expires + "; path=/";
+    }
+
+    function getCookie(name) {
+        var nameEQ = name + "=";
+        var ca = document.cookie.split(';');
+        for(var i=0;i < ca.length;i++) {
+            var c = ca[i];
+            while (c.charAt(0)==' ') c = c.substring(1,c.length);
+            if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+        }
+        return null;
+    }
+
+    function eraseCookie(name) {   
+        document.cookie = name +'=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+    }
+
 
     window.MockPay = MockPay;
 })()
