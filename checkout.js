@@ -1,12 +1,12 @@
 (function () {
     
-    function MockPay({amount, keyId, onSuccess, onFailure, customer, themeColor, currency}) {
+    function MockPay({amount, keyId, onSuccess, onFailure, customer, themeColor, currency_user_defined}) {
         this.amount = amount;
         this.keyId = keyId;
         this.onSuccess = onSuccess;
         this.onFailure = onFailure;
 
-        this.currency = currency || 'USD';
+        this.currency_user_defined = currency_user_defined || 'USD';
         customerx = customer || {};
 
         console.log(customer);
@@ -133,7 +133,7 @@
             
             const header_area_amount = document.createElement('div');
             header_area_amount.className = 'payment-card-header-amount';
-            header_area_amount.innerHTML = this.currency +' ' + this.amount;
+            header_area_amount.innerHTML = this.currency_user_defined +' ' + this.amount;
             header_area_title.appendChild(header_area_amount);
 
             header_area.appendChild(header_area_title);
@@ -1668,7 +1668,7 @@
                                 "amount": amount,
                                 "complete_payment_url": "http://example.com/complete",
                                 "country": countrycode,
-                                "currency": currency,
+                                "currency": this.currency_user_defined,
                                 // "requested_currency": currency,
                                 "customer": customer_id_global,
                                 "error_payment_url": "http://example.com/error",
