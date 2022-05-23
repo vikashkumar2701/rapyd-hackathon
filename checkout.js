@@ -7,6 +7,7 @@
         this.onFailure = onFailure;
 
         this.currency_user_defined = currency_user_defined || 'USD';
+        currency_user_definedx = this.currency_user_defined;
         customerx = customer || {};
 
         console.log(customer);
@@ -1668,7 +1669,7 @@
                                 "amount": amount,
                                 "complete_payment_url": "http://example.com/complete",
                                 "country": countrycode,
-                                "currency": this.currency_user_defined,
+                                "currency": currency_user_definedx,
                                 // "requested_currency": currency,
                                 "customer": customer_id_global,
                                 "error_payment_url": "http://example.com/error",
