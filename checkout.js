@@ -7,7 +7,7 @@
         this.onFailure = onFailure;
 
         this.currency_user_defined = currency_user_defined || 'USD';
-        currency_user_definedx = this.currency_user_defined;
+        currency_user_definedx = currency_user_defined;
         customerx = customer || {};
 
         console.log(customer);
