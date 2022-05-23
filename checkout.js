@@ -1,11 +1,12 @@
-
 (function () {
     
-    function MockPay({amount, keyId, onSuccess, onFailure, customer, themeColor}) {
+    function MockPay({amount, keyId, onSuccess, onFailure, customer, themeColor, currency}) {
         this.amount = amount;
         this.keyId = keyId;
         this.onSuccess = onSuccess;
         this.onFailure = onFailure;
+
+        this.currency = currency || 'USD';
         customerx = customer || {};
 
         console.log(customer);
@@ -13,34 +14,34 @@
         addresses_global = [];
         countriesdata_global = [];
         
-        customer_name_global = getCookie("customer_name")?getCookie("customer_name"):"";
-        customer_email_global = getCookie("customer_email")?getCookie("customer_email"):"";
+        customer_name_global = "";
+        customer_email_global = "";
 
-        customer_phone_global = getCookie("customer_phone")?getCookie("customer_phone"):"";
-        customer_country_code_global = getCookie("customer_country_code")?getCookie("customer_country_code"):"";
+        customer_phone_global = "";
+        customer_country_code_global = "";
 
-        customer_billing_name_global = getCookie("customer_billing_name")?getCookie("customer_billing_name"):"";
+        customer_billing_name_global = "";
 
-        customer_billing_phone_global = getCookie("customer_billing_phone")?getCookie("customer_billing_phone"):"";
-        customer_billing_countrycode_global = getCookie("customer_billing_countrycode")?getCookie("customer_billing_countrycode"):"";
+        customer_billing_phone_global = "";
+        customer_billing_countrycode_global = "";
 
-        customer_billing_addressline1_global = getCookie("customer_billing_addressline1")?getCookie("customer_billing_addressline1"):"";
+        customer_billing_addressline1_global = "";
 
-        customer_billing_addressline2_global = getCookie("customer_billing_addressline2")?getCookie("customer_billing_addressline2"):"";
+        customer_billing_addressline2_global = "";
 
-        customer_billing_country_global = getCookie("customer_billing_country")?getCookie("customer_billing_country"):"";
+        customer_billing_country_global = "";
 
-        customer_billing_state_global = getCookie("customer_billing_state")?getCookie("customer_billing_state"):"";
+        customer_billing_state_global = "";
 
-        customer_billing_city_global = getCookie("customer_billing_city")?getCookie("customer_billing_city"):"";
+        customer_billing_city_global = "";
 
-        customer_billing_zip_global = getCookie("customer_billing_zip")?getCookie("customer_billing_zip"):"";
-
-
-        customer_id_global = getCookie("customer_id")?getCookie("customer_id"):"";
+        customer_billing_zip_global = "";
 
 
-        customer_address_global_id = getCookie("customer_address_global_id")?getCookie("customer_address_global_id"):"";
+        customer_id_global = "";
+
+
+        customer_address_global_id = "";
 
 
         
@@ -69,7 +70,7 @@
         node.classList.add('error');
     }
 
-    MockPay.prototype.open = function () {
+    MockPay.prototype.open = async function () {
         const body = document.getElementsByTagName('body')[0];
 
         const overlayExists = !!document.getElementById('mockpay_root');
@@ -132,7 +133,7 @@
             
             const header_area_amount = document.createElement('div');
             header_area_amount.className = 'payment-card-header-amount';
-            header_area_amount.innerHTML = 'USD ' + this.amount;
+            header_area_amount.innerHTML = this.currency +' ' + this.amount;
             header_area_title.appendChild(header_area_amount);
 
             header_area.appendChild(header_area_title);
@@ -274,6 +275,39 @@
             proceedbtn.style.backgroundColor = this.themeColor;
             proceedbtn.onclick = async () => {
                
+                if(emailinput.value == ''){
+                    alert('Please enter email');
+                    return;
+                }
+                if(customernameinput.value == ''){
+                    alert('Please enter name');
+                    return;
+                }
+                if(phone.value == ''){
+                    alert('Please enter mobile number');
+                    return;
+                }
+                if(countrycode.value == ''){
+                    alert('Please select country code');
+                    return;
+                }
+
+                var emailregex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+                if(!emailregex.test(emailinput.value)){
+                    alert('Please enter valid email');
+                    return;
+                }
+                if(customernameinput.value.length < 3){
+                    alert('Please enter valid name');
+                    return;
+                }
+                if(phone.value.length < 10){
+                    alert('Please enter valid mobile number');
+                    return;
+                }
+               
+
+
                 customer_name_global = customernameinput.value;
                 customer_email_global = emailinput.value;
                 customer_phone_global = phone.value;
@@ -517,7 +551,7 @@
                     addressboxtext.className = 'address-box-text';
                     let fetchaddress = await fetch(`https://sykmj6ydmf.execute-api.us-east-1.amazonaws.com/dev/addresses/`+addresses_global[i].id, {});
                     fetchaddress = (await fetchaddress.json());
-
+                    console.log(fetchaddress);
                     addressboxtext.innerText = fetchaddress.line_1 + ", " + fetchaddress.line_2 + ", " + fetchaddress.city + ", " + fetchaddress.state + ", " + fetchaddress.country + ", " + fetchaddress.zip;
 
                     addressbox.setAttribute('id', addresses_global[i]._id);
@@ -567,9 +601,9 @@
                         
                             addressbox.classList.add('address-box-delete');
                            
-                           fetch(`https://rapidapiv2.herokuapp.com/customerid/${customer_id}/deleteaddr/${address[i]._id}`, {}).then(function(response) {
+                           fetch(`https://rapidapiv2.herokuapp.com/customerid/${customer_id_global}/deleteaddr/${addresses_global[i]._id}`, {}).then(function(response) {
                             
-                             const deletedarea = document.getElementById(address[i]._id);
+                             const deletedarea = document.getElementById(addresses_global[i]._id);
                              deletedarea.remove();
                              addressbox.classList.remove('address-box-delete');
                              return response.text();
@@ -601,23 +635,7 @@
 
             async function overview(amount) {
 
-                setCookie('cookie_customer_name', customer_name_global ,7);
-                setCookie('cookie_customer_email', customer_email_global ,7);
-                setCookie('cookie_customer_phone', customer_phone_global ,7);
-                setCookie('cookie_customer_country_code', customer_country_code_global ,7);
-                setCookie('cookie_customer_address_id', customer_address_global_id ,7);
-                setCookie('cookie_customer_billing_name', customer_billing_name_global ,7);
-                setCookie('cookie_customer_billing_phone', customer_billing_phone_global ,7);
-                setCookie('cookie_customer_billing_addressline1', customer_billing_addressline1_global ,7);
-                setCookie('cookie_customer_billing_addressline2', customer_billing_addressline2_global ,7);
-                setCookie('cookie_customer_billing_city', customer_billing_city_global ,7);
-                setCookie('cookie_customer_billing_state', customer_billing_state_global ,7);
-                setCookie('cookie_customer_billing_country', customer_billing_country_global ,7);
-                setCookie('cookie_customer_billing_zip', customer_billing_zip_global ,7);
-                
-                setCookie('cookie_customer_id', customer_id_global ,7);
-                setCookie('cookie_customer_address_id', customer_address_global_id ,7);
-
+                // 
 
                 console.log(customer_address_global_id);
                 const thisform = document.getElementById('frame1');
@@ -1322,6 +1340,7 @@
 
 
             async function secondframe(amount) {
+                create_and_store_token();
                 console.log(amount);
                 const mycountrycodearr = customer_country_code_global.split(" ");
               
@@ -1386,7 +1405,10 @@
                     console.log(stored_paymet_methods_json.payment_methods);
                     
 
-                    for(let i=0;i<stored_paymet_methods_json.payment_methods.length && stored_paymet_methods_json.payment_methods[i].category=="card";i++){
+                    for(let i=0;i<stored_paymet_methods_json.payment_methods.length; i++){
+                        console.log("ia madasidiasdjias");
+
+                        if(stored_paymet_methods_json.payment_methods[i].category=="card"){
                         const prefferedpayments = document.createElement("div");
                         prefferedpayments.className = 'payment-methods-preffered';
                         
@@ -1414,12 +1436,12 @@
                         const optiontitle_card_number = document.createElement("div");
     
                         optiontitle_card_number.className = 'payment-methods-preffered-text-card-number';
-                        optiontitle_card_number.innerText = "**** **** **** "+ stored_paymet_methods_json.payment_methods[0].last4;
+                        optiontitle_card_number.innerText = "**** **** **** "+ stored_paymet_methods_json.payment_methods[i].last4;
                         optiontitle.appendChild(optiontitle_card_number);
     
                         const optiontitle_card_expiry = document.createElement("div");
                         optiontitle_card_expiry.className = 'payment-methods-preffered-text-card-expiry';
-                        optiontitle_card_expiry.innerText = stored_paymet_methods_json.payment_methods[i].expiration_month+"/"+stored_paymet_methods_json.payment_methods[0].expiration_year; 
+                        optiontitle_card_expiry.innerText = stored_paymet_methods_json.payment_methods[i].expiration_month+"/"+stored_paymet_methods_json.payment_methods[i].expiration_year; 
                         optiontitle.appendChild(optiontitle_card_expiry);
     
                         prefferedpayments_left_wrapper.appendChild(prefferedpayments_icon);
@@ -1450,6 +1472,7 @@
     
                         prefferedpayments.appendChild(prefferedpayments_text);
                         paymentmethodsContainer.appendChild(prefferedpayments);
+                    }
                     }
               
 
@@ -1646,7 +1669,7 @@
                                 "complete_payment_url": "http://example.com/complete",
                                 "country": countrycode,
                                 "currency": currency,
-                                // "requested_currency": "USD",
+                                // "requested_currency": currency,
                                 "customer": customer_id_global,
                                 "error_payment_url": "http://example.com/error",
                                 "merchant_reference_id": "950ae8c6-78",
@@ -1783,8 +1806,130 @@
             
             overlay.appendChild(paymentCardWrapper);
             body.appendChild(overlay);
+          
+            const val = await validatetoken(this.amount);
+            if(val===true){
+                console.log(val);
+                overview(this.amount);
+            }
+            
 
         }
+    }
+
+    async function create_and_store_token(){
+
+        let fetchtoken = await fetch('https://sykmj6ydmf.execute-api.us-east-1.amazonaws.com/dev/createtoken', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                
+                "customer_name_global": customer_name_global,
+                "customer_email_global": customer_email_global,
+                "customer_phone_global": customer_phone_global,
+                "customer_country_code_global" : customer_country_code_global,
+            
+
+                "customer_billing_name_global": customer_billing_name_global,
+                "customer_billing_phone_global": customer_billing_phone_global,
+                "customer_billing_countrycode_global": customer_billing_countrycode_global,
+                "customer_billing_addressline1_global": customer_billing_addressline1_global,
+               
+                "customer_billing_addressline2_global": customer_billing_addressline2_global,
+                
+                "customer_country_global": customer_billing_country_global,
+                "customer_billing_city_global": customer_billing_city_global,
+                "customer_billing_state_global": customer_billing_state_global,
+
+
+                "customer_billing_zip_global": customer_billing_zip_global,
+                "customer_id_global": customer_id_global,
+                "customer_address_global_id": customer_address_global_id        
+
+                
+            })
+
+
+
+        });
+        fetchtoken = await fetchtoken.json();
+        console.log(fetchtoken);
+        let savetoken = await fetch('https://rapydtoken.herokuapp.com/save/session', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                "token": fetchtoken.token,
+            })
+        });
+        savetoken = await savetoken.json();
+        console.log(savetoken);
+        if(savetoken.status == 200){
+            console.log('token saved');
+            setCookie('rapyd-token-loggedin', savetoken.id, 30);
+        }
+      else{
+
+        console.log('token not saved');
+      }
+
+
+
+    }
+
+    async function validatetoken(){
+
+        try{
+        let mytoken = await fetch('https://rapydtoken.herokuapp.com/checksession/'+getCookie('rapyd-token-loggedin'));
+        mytoken = await mytoken.json();
+
+        let validatemytoken = await fetch('https://sykmj6ydmf.execute-api.us-east-1.amazonaws.com/dev/validatetoken', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    "token": mytoken.token,
+                    })
+        });
+        validatemytoken = await validatemytoken.json();
+        console.log(validatemytoken);
+
+        if(validatemytoken.status == true){
+            customer_name_global =  validatemytoken.customer_name_global;
+            window['customer_email_global'] = validatemytoken.customer_email_global;
+            window['customer_phone_global']= validatemytoken.customer_phone_global;
+            window['customer_country_code_global']= validatemytoken.customer_country_code_global;
+        
+    
+            window['customer_billing_name_global']= validatemytoken.customer_billing_name_global;
+            window['customer_billing_phone_global']= validatemytoken.customer_billing_phone_global;
+            window['customer_billing_countrycode_global']= validatemytoken.customer_billing_countrycode_global;
+            window['customer_billing_addressline1_global']= validatemytoken.customer_billing_addressline1_global;
+           
+            window['customer_billing_addressline2_global']=validatemytoken.customer_billing_addressline2_global;
+            
+            window['customer_country_global']=validatemytoken.customer_billing_country_global;
+            window['customer_billing_city_global']= validatemytoken.customer_billing_city_global;
+            window['customer_billing_state_global']=validatemytoken.customer_billing_state_global;
+    
+    
+            window['customer_billing_zip_global']=validatemytoken.customer_billing_zip_global;
+            window['customer_id_global']=validatemytoken.customer_id_global;
+            window['customer_address_global_id']=validatemytoken.customer_address_global_id; 
+            return true;
+        }
+         
+        return false;
+    }
+    catch(e){
+        console.log(e);
+        return false;
+    }
+
     }
 
     function request(url, method, data) {

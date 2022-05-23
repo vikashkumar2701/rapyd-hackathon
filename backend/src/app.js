@@ -32,7 +32,7 @@ const corsConfig = {
     credentials: true,
     origin: true,
 };
-app.use(cors(corsConfig));
+app.use(cors());
 app.listen(3000);
 var salt = "";
 app.get('/FetchPaymentMethods/:countryname', async (req, res) => {
@@ -388,6 +388,148 @@ app.get("/customer/:customerid/paymentmethods", async (req, res) => {
     }
 
 });
+
+app.post("/createtoken", async (req, res) => {
+    let body = req.body;
+    try{
+        const token = jwt.sign({
+            
+            "customer_name_global": body.customer_name_global,
+            "customer_email_global": body.customer_email_global,
+            
+            "customer_phone_global": body.customer_phone_global,
+
+            "customer_country_code_global" : body.customer_country_code_global,
+
+
+
+
+
+            "customer_billing_name_global": body.customer_billing_name_global,
+
+             "customer_billing_phone_global" : body.customer_billing_phone_global,
+            
+             "customer_billing_countrycode_global": body.customer_billing_countrycode_global,
+
+            "customer_addressline1_global" : body.customer_billing_addressline1_global,
+
+            
+
+
+            "customer_billing_addressline2_global" : body.customer_billing_addressline2_global,
+
+            "customer_billing_country_global" : body.customer_billing_country_global,
+
+            "customer_billing_state_global" : body.customer_billing_state_global,
+
+            "customer_billing_city_global" : body.customer_billing_city_global,
+
+
+
+            "customer_billing_zip_global"  : body.customer_billing_zip_global,
+
+            "customer_id_global" : body.customer_id_global,
+
+
+            "customer_address_global_id" : body.customer_address_global_id
+        
+
+
+
+
+        }, 'secret', { expiresIn: '30d' });
+
+        const response = {
+            "status": true,
+            "token": token
+        }
+        res.status(200).json(response);
+
+
+   
+    
+
+}
+    catch(error){
+        const resp  = {
+            "status": "false",
+            "token": 0 
+        }
+        res.status(200).send(error);
+    }
+
+});
+
+
+app.post("/validatetoken", async (req, res) => {
+
+let body = req.body;
+let token = body.token;
+
+    try{
+    const decoded = jwt.verify(token, 'secret');
+    const response = {
+        "status": true,
+        "customer_name_global": decoded.customer_name_global,
+        "customer_email_global": decoded.customer_email_global,
+
+        "customer_phone_global": decoded.customer_phone_global,
+
+        "customer_country_code_global" : decoded.customer_country_code_global,
+
+
+
+
+
+        "customer_billing_name_global": decoded.customer_billing_name_global,
+
+        "customer_billing_phone_global" : decoded.customer_billing_phone_global,
+
+        "customer_billing_countrycode_global": decoded.customer_billing_countrycode_global,
+
+        "customer_billing_addressline1_global" : decoded.customer_addressline1_global,
+
+        "customer_billing_addressline2_global" : decoded.customer_billing_addressline2_global,
+
+        "customer_billing_country_global" : decoded.customer_billing_country_global,
+
+        "customer_billing_state_global" : decoded.customer_billing_state_global,
+
+        "customer_billing_city_global" : decoded.customer_billing_city_global,
+
+        "customer_billing_zip_global"  : decoded.customer_billing_zip_global,
+
+        "customer_id_global" : decoded.customer_id_global,
+
+
+        "customer_address_global_id" : decoded.customer_address_global_id
+
+
+
+    }
+
+    res.status(200).json(response);
+
+
+
+
+
+    }
+    catch(error){
+        const resp  = {
+            "status": "false",
+            "token": 0 
+        }
+        res.status(404).json(resp);
+    }
+
+    
+
+
+
+
+});
+
 
 
 	

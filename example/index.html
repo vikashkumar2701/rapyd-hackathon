@@ -40,6 +40,7 @@
                     },
                     keyId: 'mockpay_o35lKNXgA3s5',
                     amount: 100,
+                    currency: 'INR',
                     customer: {
                         name: form.children[1].value,
                         email: form.children[3].value,
@@ -54,17 +55,17 @@
  
 
     <script>
-                window.addEventListener('onCheckoutPaymentSuccess', function (event) {
+            window.addEventListener('onCheckoutPaymentSuccess', function (event) {
             console.log(event.detail);
-            feedback(event);
+           alert(event.detail);
         });
         window.addEventListener('onCheckoutFailure', function (event) {
             console.log(event.detail.error);
-            feedback(event);
+           alert(event.detail);
         });
         window.addEventListener('onCheckoutPaymentFailure', (event)=> {
             console.log(event.detail.error);
-            feedback(event);
+           alert(event.detail);
         })
 
 
