@@ -353,7 +353,7 @@ app.get("/list/coupons", async (req, res) => {
     // console.log(response.body.data);
     const resp  = {
         "status": "true",
-        "coupons": response.body.data.length,
+        "coupons": response.body.data,
     }
     res.status(200).json(resp);
     }

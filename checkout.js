@@ -45,6 +45,7 @@
         customer_address_global_id = "";
 
 
+        discount_global= 0;
         
 
 
@@ -637,7 +638,8 @@
             async function overview(amount) {
 
                 // 
-
+                var discount = discount_global;
+                var total = amount-discount_global;
                 console.log(customer_address_global_id);
                 const thisform = document.getElementById('frame1');
                 thisform.style.display = 'none';
@@ -754,7 +756,7 @@
                 address_header_edit_button.innerText = "Edit / Change";
                 address_header_edit_button.onclick = (() => {
                     
-                    edit_add_address(amount);
+                    edit_add_address(total);
                 });
 
                 address_header_edit.appendChild(address_header_edit_button);
@@ -831,7 +833,7 @@
                 coupons_discount.innerHTML = '<i class="fa-solid fa-tag"></i>';
                 const coupons_discount_text = document.createElement("div");
                 coupons_discount_text.className = 'coupons-discount-text';
-                coupons_discount_text.innerHTML = "Have a coupon? <span class='gray-coupons'> ( "+fetchcoupons.coupons+" Available )</span>";
+                coupons_discount_text.innerHTML = "Have a coupon? <span class='gray-coupons'> ( "+fetchcoupons.coupons.length+" Available )</span>";
                 const rightarrow = document.createElement("div");
                 rightarrow.className = 'rightarrow';
                 rightarrow.innerHTML = '<i class="fa-solid fa-angle-right"></i>';
@@ -853,8 +855,7 @@
 
                 order_wrapper.appendChild(order_header);
 
-                var discount = 0;
-                var total = amount-discount;
+               
                 const order_details = document.createElement("div");
                 order_details.className = 'order-details';
 
@@ -908,7 +909,7 @@
                 paybutton.id = 'absbtn';
                 paybutton.innerText = "Pay";
                 paybutton.onclick = (() => {
-                  secondframe(amount);
+                  secondframe(total);
                   
                   
                 
@@ -925,7 +926,7 @@
                 
 
                 coupons_wrapper.onclick = (() => {
-                    coupons_frame(amount);
+                    coupons_frame(amount, fetchcoupons);
                 });
 
 
@@ -945,9 +946,9 @@
               
             }
 
-            async function coupons_frame(amount){
+            async function coupons_frame(amount, coupons_json){
 
-
+                console.log(coupons_json.coupons);
                 const thisform = document.getElementById('frame1');
                 thisform.style.display = 'none';
                 const thisform2 = document.getElementById('frame2');
@@ -982,7 +983,8 @@
                 });
                 coupons_header_wrapper.appendChild(coupons_header);
                 coupons_header_wrapper.appendChild(back_to_overview_btn);
-
+                coupons_wrapper_parent.appendChild(coupons_header_wrapper);
+                for(let i=0; i<coupons_json.coupons.length; i++){
                 const coupons_lists = document.createElement("div");
                 coupons_lists.className = 'coupons-lists';
                 
@@ -990,27 +992,48 @@
                 const coupons_list_child = document.createElement("div");
                 coupons_list_child.className = 'coupons-list-child';
                 
-                
+                const coupons_header = document.createElement("div");
+                coupons_header.className = 'coupons-header';
+
                 const coupons_list_child_text = document.createElement("div");
                 coupons_list_child_text.className = 'coupons-list-child-text';
-                coupons_list_child_text.innerText = "Coupon Code";
+                coupons_list_child_text.innerText = coupons_json.coupons[i].metadata.code;
+
+                const applybtn = document.createElement("button");
+                applybtn.className = 'button-58 small';
+                applybtn.innerText = "Apply";
+                applybtn.onclick = (() => {
+                    let discounted_amount = (coupons_json.coupons[i].amount_off!=0? (amount - coupons_json.coupons[i].amount_off) : (amount- (coupons_json.coupons[i].percent_off/100 * amount)));
+
+                    discount_global = (coupons_json.coupons[i].amount_off!=0? coupons_json.coupons[i].amount_off : (coupons_json.coupons[i].percent_off/100 * amount));
+                    this.amount = discounted_amount;
+                    document.getElementsByClassName('payment-card-header-amount')[0].innerText = currency_user_definedx + " "+ discounted_amount;
+                     overview(amount);
+                });
+
                 const coupons_list_child_value = document.createElement("div");
                 coupons_list_child_value.className = 'coupons-list-child-value';
-                coupons_list_child_value.innerText = "Use code " + "ABCD";
+                coupons_list_child_value.innerText = "Use code " + coupons_json.coupons[i].metadata.code + " to get " + (coupons_json.coupons[i].amount_off!=0 ? "FLAT" +coupons_json.coupons[i].amount_off : coupons_json.coupons[i].percent_off + "%" ) + " off";
                 const coupons_list_child_date = document.createElement("div");
                 coupons_list_child_date.className = 'coupons-list-child-date';
-                coupons_list_child_date.innerText = "Valid Till";
-                coupons_list_child.appendChild(coupons_list_child_text);
+                coupons_list_child_date.innerText = "";
+
+                coupons_header.appendChild(coupons_list_child_text);
+                coupons_header.appendChild(applybtn);
+
+
+                coupons_list_child.appendChild(coupons_header);
                 coupons_list_child.appendChild(coupons_list_child_value);
                 coupons_list_child.appendChild(coupons_list_child_date);
                 coupons_lists.appendChild(coupons_list_child);
-
-                coupons_wrapper_parent.appendChild(coupons_header_wrapper);
                 coupons_wrapper_parent.appendChild(coupons_lists);
-
+               
+                }
+               
+               
                 thisform2.appendChild(coupons_wrapper_parent);
                 
-
+               
 
 
             }
