@@ -1,11 +1,12 @@
 (function () {
     
-    function MockPay({amount, keyId, onSuccess, onFailure, customer, themeColor, currency_user_defined, business_icon}) {
+    function MockPay({amount, keyId, onSuccess, onFailure, customer, themeColor, currency_user_defined, business_icon, business_title}) {
         this.amount = amount;
         this.keyId = keyId;
         this.onSuccess = onSuccess;
         this.onFailure = onFailure;
         this.business_icon = business_icon || "https://dashboard.rapyd.net/images/rapyd-logo-black.svg";
+        this.business_title = business_title || "Rapyd";
 
         this.currency_user_defined = currency_user_defined || 'USD';
         currency_user_definedx = currency_user_defined;
@@ -125,7 +126,7 @@
             
             const header_area_companyname = document.createElement('div');
             header_area_companyname.className = 'payment-card-header-companyname';
-            header_area_companyname.innerHTML = 'Rapyd';
+            header_area_companyname.innerHTML = this.business_title;
             header_area_title.appendChild(header_area_companyname);
             const header_area_extrainfo = document.createElement('div');
             header_area_extrainfo.className = 'payment-card-header-extrainfo';
