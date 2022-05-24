@@ -1,13 +1,13 @@
 (function () {
     
-    function MockPay({amount, keyId, onSuccess, onFailure, customer, themeColor, currency_user_defined, business_icon, business_title}) {
+    function MockPay({amount, keyId, onSuccess, onFailure, customer, themeColor, currency_user_defined, business_icon, business_title, order_id}) {
         this.amount = amount;
         this.keyId = keyId;
         this.onSuccess = onSuccess;
         this.onFailure = onFailure;
         this.business_icon = business_icon || "https://dashboard.rapyd.net/images/rapyd-logo-black.svg";
         this.business_title = business_title || "Rapyd";
-
+        this.order_id = order_id || (String.fromCharCode(65 + Math.floor(Math.random() * 26))+ Date.now()) ;
         this.currency_user_defined = currency_user_defined || 'USD';
         currency_user_definedx = currency_user_defined;
         customerx = customer || {};
@@ -130,7 +130,7 @@
             header_area_title.appendChild(header_area_companyname);
             const header_area_extrainfo = document.createElement('div');
             header_area_extrainfo.className = 'payment-card-header-extrainfo';
-            header_area_extrainfo.innerHTML = 'ORDS134442';
+            header_area_extrainfo.innerHTML = this.order_id;
 
 
             header_area_title.appendChild(header_area_extrainfo);
