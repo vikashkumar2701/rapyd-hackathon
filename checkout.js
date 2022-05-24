@@ -1319,7 +1319,8 @@
                             })
                         });
                         const savethisaddress_json = await savethisaddress.json();
-                        customer_address_global_id = savethisaddress_json.body.id;
+                        console.log(savethisaddress_json);
+                        customer_address_global_id = savethisaddress_json.address_id;
                         console.log(savethisaddress_json);
 
                         alert("Address Saved");
