@@ -358,7 +358,7 @@
                             console.log("customer created");
                             customer_id = create_customer.body.data.id;
                             customer_id_global = customer_id;
-                            const savetodatabase = await request('save/customer', "POST", {
+                            const savetodatabase = await request('https://rapidapiv2.herokuapp.com/save/customer', "POST", {
                                 
                                     "name" : create_customer.body.data.name,
                                     "email" : create_customer.body.data.email,
