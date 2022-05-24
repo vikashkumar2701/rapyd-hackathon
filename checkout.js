@@ -1,10 +1,11 @@
 (function () {
     
-    function MockPay({amount, keyId, onSuccess, onFailure, customer, themeColor, currency_user_defined}) {
+    function MockPay({amount, keyId, onSuccess, onFailure, customer, themeColor, currency_user_defined, business_icon}) {
         this.amount = amount;
         this.keyId = keyId;
         this.onSuccess = onSuccess;
         this.onFailure = onFailure;
+        this.business_icon = business_icon || "https://dashboard.rapyd.net/images/rapyd-logo-black.svg";
 
         this.currency_user_defined = currency_user_defined || 'USD';
         currency_user_definedx = currency_user_defined;
@@ -89,7 +90,7 @@
             const loadingOverlay = document.createElement('div');
             loadingOverlay.className = 'loading hide';
             const loadingGif = document.createElement('img');
-            loadingGif.src = "../rocket.gif";
+            loadingGif.src = "https://anonpe.com/circle-preloader.svg";
             loadingGif.className = "loading-animation";
             const loadingText = document.createElement('p');
             loadingText.style.color = 'black';
@@ -113,7 +114,7 @@
             header_area.appendChild(header_area_border);
 
             const header_area_img = document.createElement('img');
-            header_area_img.src = 'https://dashboard.rapyd.net/images/rapyd-logo-black.svg';
+            header_area_img.src = this.business_icon;
             header_area_img.className = 'payment-card-header-logo-img';
             header_area_border.appendChild(header_area_img);
 
