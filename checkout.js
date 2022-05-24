@@ -1260,7 +1260,7 @@
 
                         alert("Address Saved");
 
-                        customer_address_global_id = savethisaddress_json.body.id;
+                        customer_address_global_id = savethisaddress_json.address_id;
 
                         }
                     
