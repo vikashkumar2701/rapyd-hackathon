@@ -935,12 +935,22 @@ width:40px;
 
 }
 
+.payment-methods-preffered:hover{
+
+    background-color: rgba(98, 172, 255, 0.1);
+   
+
+
+
+}
+
 .payment-methods-preffered-left-wrapper{
 
     display: flex;
     
     color: black;
     padding: 10px;
+    width: 75%;
    
 }
 .payment-methods-preffered-text{
@@ -987,7 +997,7 @@ margin:0px auto;
 
 #rapyd-checkout {
 
-    position: absolute;top: 0px;background: #ffffffc2;width: 100%;display: flex;backdrop-filter: blur(47px);/* background: center; */margin: 0px auto;/* box-shadow: rgba(50, 50, 93, 0.25) 0px 50px 100px -20px, rgba(0, 0, 0, 0.3) 0px 30px 60px -30px, rgba(10, 37, 64, 0.35) 0px -2px 6px 0px inset; */
+    position: absolute;top: 0px;background: #ffffffc2;width: 100%;display: flex;backdrop-filter: blur(47px);/* background: center; */margin: 0px auto;box-shadow: rgba(50, 50, 93, 0.25) 0px 50px 100px -20px, rgba(0, 0, 0, 0.3) 0px 30px 60px -30px, rgba(10, 37, 64, 0.35) 0px -2px 6px 0px inset;
     
 
 }
@@ -1013,4 +1023,21 @@ justify-content: space-between;
 
     margin-top:10px;
 
+}
+
+.payment-methods-preffered-right-wrapper{
+
+display: flex;
+flex-direction: row;
+align-items: center;
+}
+
+.payment-methods-preffered-delete-icon {
+
+    
+    font-size: 12px;
+    padding: 10px;
+    margin-left: 10px;
+    cursor: pointer;
+    color: #001AFF;
 }

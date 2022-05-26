@@ -42,6 +42,7 @@
                     amount: 100,
                     business_icon: 'https://simgbb.com/images/logo.png',
                     business_title: 'MockPay',
+                    complete_payment_url : 'https://google.com',
                     currency_user_defined: 'INR',
                     customer: {
                         name: form.children[1].value,
@@ -55,45 +56,5 @@
     </script>
 
  
-
-    <script>
-            window.addEventListener('onCheckoutPaymentSuccess', function (event) {
-            console.log(event.detail);
-           alert(event.detail);
-        });
-        window.addEventListener('onCheckoutFailure', function (event) {
-            console.log(event.detail.error);
-           alert(event.detail);
-        });
-        window.addEventListener('onCheckoutPaymentFailure', (event)=> {
-            console.log(event.detail.error);
-           alert(event.detail);
-        })
-
-
-        // display information to the user
-        function feedback(event){
-            if (event.detail.error){
-                document.getElementById('title').textContent = "Whoops!";
-                document.getElementById('message').innerHTML = "We cannot process your payment:<br/>" + 
-                    event.detail.error;
-                document.getElementById('image').src = "img/no-bike.svg";
-                document.getElementById('action').textContent = "Try again";
-            }
-            else {
-                document.getElementById('title').textContent = "Success!";
-                document.getElementById('message').innerHTML = "Thank you! Your product is on its way!" + 
-                    "<br>" +
-                    "Order: " + event.detail.metadata.sales_order;
-                document.getElementById('image').src = "img/logo.svg";
-                document.getElementById('action').textContent = "Home";
-            }
-
-            document.getElementById('action').href = "bike.html";
-            document.getElementById('feedback').style.display = "block";
-        }
-   
-        
-    </script>
 </body>
 </html>

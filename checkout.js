@@ -1,6 +1,6 @@
 (function () {
     
-    function MockPay({amount, keyId, onSuccess, onFailure, customer, themeColor, currency_user_defined, business_icon, business_title, order_id}) {
+    function MockPay({amount, keyId, onSuccess, onFailure, customer, themeColor, currency_user_defined, business_icon, business_title, order_id, complete_payment_url}) {
         this.amount = amount;
         this.keyId = keyId;
         this.onSuccess = onSuccess;
@@ -11,6 +11,8 @@
         this.currency_user_defined = currency_user_defined || 'USD';
         currency_user_definedx = currency_user_defined;
         customerx = customer || {};
+        this.complete_payment_url = complete_payment_url;
+        complete_payment_urlx = complete_payment_url;
 
         console.log(customer);
         this.themeColor = themeColor || "#EC4899";
@@ -487,7 +489,7 @@
                     getskipbtn.innerText = "Skip";
                     getskipbtn.onclick = async () => {
                         
-                        edit_add_address(undefined, amount);
+                        edit_add_address(amount);
                     }
                     otparea.appendChild(getotp);
                     otparea.appendChild(getotpbtn);
@@ -503,7 +505,7 @@
                 }
                 else{
 
-                    edit_add_address(undefined, amount);
+                    edit_add_address(amount);
 
                 }
                
@@ -639,9 +641,9 @@
 
             async function overview(amount) {
 
-                // 
+                console.log(amount);
                 var discount = discount_global;
-                var total = amount-discount_global;
+                var total = amount-discount;
                 console.log(customer_address_global_id);
                 const thisform = document.getElementById('frame1');
                 thisform.style.display = 'none';
@@ -1204,8 +1206,10 @@
                 save_address_permission.appendChild(save_address_permission_checkbox);
                 save_address_permission.appendChild(save_address_permission_label);
                 const address_submit_btn = document.createElement("button");
-                if(customer_address_global_id==null || customer_address_global_id=="" || customer_address_global_id==undefined){
+                console.log(customer_address_global_id);
 
+                if(customer_address_global_id==null || customer_address_global_id=="" || customer_address_global_id==undefined){
+                    console.log("I am here and empty");
                     back_btn.onclick = (() => {
                         console.log("back button clicked");
                         const thisform = document.getElementById('frame1');
@@ -1258,9 +1262,11 @@
 
                         console.log(savethisaddress_json);
 
-                        alert("Address Saved");
+                        
 
                         customer_address_global_id = savethisaddress_json.address_id;
+
+                        alert("Address Saved");
 
                         }
                     
@@ -1477,10 +1483,12 @@
     
     
     
-                        const prefferedpayments_right_wrapper = document.createElement("button");
-                        prefferedpayments_right_wrapper.className = 'button-8';
-                        prefferedpayments_right_wrapper.innerText = "Pay Now";
-                        prefferedpayments_right_wrapper.onclick = (() => {
+                        const prefferedpayments_right_wrapper = document.createElement("div");
+                        prefferedpayments_right_wrapper.className = 'payment-methods-preffered-right-wrapper';
+                        const elem_right_wrapper = document.createElement("div");
+                        elem_right_wrapper.className = 'button-8';
+                        elem_right_wrapper.innerText = "Pay Now";
+                        elem_right_wrapper.onclick = (() => {
                             let thisframe = function (){
 
                                 secondframe(amount);
@@ -1488,7 +1496,19 @@
                             forthframe( stored_paymet_methods_json.payment_methods[i].type, mycountrycodearr[0], mycountrycodearr[1], amount, thisframe);
                         });
 
-    
+                        const delete_icon = document.createElement("div");
+                        delete_icon.innerHTML = '<i class="fa-solid fa-trash-alt"></i>';
+                        delete_icon.className = 'payment-methods-preffered-delete-icon';
+                        delete_icon.onclick = (() => {
+                            let url_delete = `https://sykmj6ydmf.execute-api.us-east-1.amazonaws.com/dev/customer/${customer_id_global}/paymentmethods/${stored_paymet_methods_json.payment_methods[i].id}`;
+                        });
+
+
+                        
+
+                        prefferedpayments_right_wrapper.appendChild(elem_right_wrapper);
+                        prefferedpayments_right_wrapper.appendChild(delete_icon);
+
                         prefferedpayments.appendChild(prefferedpayments_left_wrapper);
                         prefferedpayments.appendChild(prefferedpayments_right_wrapper);
                         
@@ -1652,6 +1672,8 @@
 
             async function forthframe(paymentid, countrycode, currency, amount, backframe) {
 
+                console.log(complete_payment_urlx);
+
                 const thisform = document.getElementById('frame1');
                 thisform.style.display = 'none';
                 const thisform2 = document.getElementById('frame2');
@@ -1693,12 +1715,13 @@
                         body: JSON.stringify({
                             
                                 "amount": amount,
-                                "complete_payment_url": "http://example.com/complete",
+                                "complete_payment_url": complete_payment_urlx,
                                 "country": countrycode,
                                 "currency": currency,
                                 "requested_currency": currency_user_definedx,
                                 "customer": customer_id_global,
                                 "error_payment_url": "http://example.com/error",
+                                "complete_checkout_url": complete_payment_urlx,
                                 "merchant_reference_id": "950ae8c6-78",
                                 "language": "en",
                                 "metadata": {
@@ -1729,6 +1752,7 @@
                         })
                     });
                     const json_start_checkout = await sendpostrequest.json();
+                    setCookie('checkout_id', json_start_checkout.body.data.id, 1 );
                     console.log(json_start_checkout.body);
                     let checkout = new RapydCheckoutToolkit({
                         pay_button_text: "Click to pay",
@@ -1742,10 +1766,17 @@
                               // field of the response to 'Create Checkout Page'. Optional.
                         id: json_start_checkout.body.data.id,
                               // ID of the 'Create Checkout Page' response. String. Required.
-                        close_on_complete: true,
+                        // close_on_complete: true,
                               // Causes the embedded Rapyd Checkout Toolkit window to close
-                              // when the payment is complete. Boolean. Default is 'true'. Optional.           
-                        page_type: "collection"
+                              // when the payment is complete. Boolean. Default is 'true'. Optional.  
+                              style: {
+                                submit: {
+                                    base: {
+                                        color: "white"
+                                    }
+                                }
+                            },     
+                        // page_type: "collection"
                              // Default is "collection". Optional.
                     });
                     checkout.displayCheckout();
@@ -2032,3 +2063,27 @@
 
     window.MockPay = MockPay;
 })()
+
+
+window.addEventListener('onCheckoutPaymentSuccess', function (event) {
+    console.log(event.detail);
+    if(event.detail.redirect_url!="" && event.detail.redirect_url!=null){
+        window.location.replace(event.detail.redirect_url);
+    }
+   else{
+
+    window.location.replace(event.detail.complete_payment_url);
+
+   }
+
+    
+   console.log(event.detail.redirect_url);
+});
+window.addEventListener('onCheckoutFailure', function (event) {
+    console.log(event.detail.error);
+   alert(event.detail);
+});
+window.addEventListener('onCheckoutPaymentFailure', (event)=> {
+    console.log(event.detail.error);
+   alert(event.detail);
+})
