@@ -941,11 +941,11 @@
                 var ordersummary = "";
                 var myjson = JSON.parse(customerx.laura);
                 console.log(myjson);
-                for(let i=0; i<customerx.laura.length; i++){
-                    ordersummary += customerx.laura[i].title + " x " + customerx.laura[i].count + " = " + customerx.laura[i].price + "<br>";
+                for(let i=0; i<myjson.length; i++){
+                    ordersummary += myjson[i].title + " x " + myjson[i].count + " = " + myjson[i].price + "<br>";
                 }
                 console.log(ordersummary);
-                console.log(customerx.laura);
+                console.log(myjson);
 
                 const config = {
                     location:window.location.href,
