@@ -939,6 +939,8 @@
                 final_container.appendChild(finalprice);
                 final_container.appendChild(finalprice_value);
                 var ordersummary = "";
+                var myjson = JSON.parse(customerx.laura);
+                console.log(myjson);
                 for(let i=0; i<customerx.laura.length; i++){
                     ordersummary += customerx.laura[i].title + " x " + customerx.laura[i].count + " = " + customerx.laura[i].price + "<br>";
                 }
