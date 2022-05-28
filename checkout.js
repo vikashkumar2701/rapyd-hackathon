@@ -857,16 +857,16 @@
                 coupons_discount_text.className = 'coupons-discount-text';
                 coupons_discount_text.innerHTML = "Have a coupon? <span class='gray-coupons'> ( "+fetchcoupons.coupons.length+" Available )</span>";
 
-                // const sendsms = await fetch('https://eofff2jdexqmz3.m.pipedream.net', {
-                //     method: 'POST',
-                //     headers: {
-                //         'Content-Type': 'application/json'
-                //         },
-                //         body: JSON.stringify({
-                //             "phone": "+" + mycountrycodearr[2] + customer_phone_global,
-                //             "message": "You have "+ fetchcoupons.coupons.length +" coupons available for use. Apply them to get discounts on this order."
-                //         })
-                //     });
+                const sendsms = await fetch('https://eofff2jdexqmz3.m.pipedream.net', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            "phone": "+" + mycountrycodearr[2] + customer_phone_global,
+                            "message": "You have "+ fetchcoupons.coupons.length +" coupons available for use. Apply them to get discounts on this order."
+                        })
+                    });
                 
                 
                 const rightarrow = document.createElement("div");
