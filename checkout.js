@@ -50,6 +50,8 @@
 
 
         discount_global= 0;
+
+        
         
 
 
@@ -77,6 +79,22 @@
     }
 
     MockPay.prototype.open = async function () {
+        var imported = document.createElement('script');
+        imported.src = 'https://cdn.jsdelivr.net/npm/add-to-calendar-button@1.8';
+
+        
+        document.head.appendChild(imported);
+
+        var elementcss = document.createElement("link");
+        elementcss.setAttribute("rel", "stylesheet");
+        elementcss.setAttribute("type", "text/css");
+        elementcss.setAttribute("href", "https://cdn.jsdelivr.net/npm/add-to-calendar-button@1.8/assets/css/atcb.min.css");
+        document.getElementsByTagName("head")[0].appendChild(elementcss);
+
+
+
+
+
         const body = document.getElementsByTagName('body')[0];
 
         const overlayExists = !!document.getElementById('mockpay_root');
@@ -839,16 +857,16 @@
                 coupons_discount_text.className = 'coupons-discount-text';
                 coupons_discount_text.innerHTML = "Have a coupon? <span class='gray-coupons'> ( "+fetchcoupons.coupons.length+" Available )</span>";
 
-                const sendsms = await fetch('https://eofff2jdexqmz3.m.pipedream.net', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            "phone": "+" + mycountrycodearr[2] + customer_phone_global,
-                            "message": "You have "+ fetchcoupons.coupons.length +" coupons available for use. Apply them to get discounts on this order."
-                        })
-                    });
+                // const sendsms = await fetch('https://eofff2jdexqmz3.m.pipedream.net', {
+                //     method: 'POST',
+                //     headers: {
+                //         'Content-Type': 'application/json'
+                //         },
+                //         body: JSON.stringify({
+                //             "phone": "+" + mycountrycodearr[2] + customer_phone_global,
+                //             "message": "You have "+ fetchcoupons.coupons.length +" coupons available for use. Apply them to get discounts on this order."
+                //         })
+                //     });
                 
                 
                 const rightarrow = document.createElement("div");
@@ -920,7 +938,32 @@
 
                 final_container.appendChild(finalprice);
                 final_container.appendChild(finalprice_value);
+                console.log(customerx.laura);
+                const config = {
+                    location:window.location.href,
+                    name: "Reminder to complete your order",
+                    description: "Check out the maybe easiest way to include add-to-calendar-buttons to your website at:<br>→ [url]https://github.com/jekuer/add-to-calendar-button[/url]",
+                    startDate: "2022-01-14",
+                    endDate: "2022-01-18",
+                    options: ["Apple",
+                    "Google",
+                    "iCal",
+                    "Microsoft365",
+                    "MicrosoftTeams",
+                    "Outlook.com",
+                    "Yahoo"],
+                   
+                    trigger: "click",
+                    iCalFileName: "Reminder-Event",
+                  }
+                  
 
+                const calendarbtn = document.createElement("button");
+                calendarbtn.className = 'button-58 btn-calendar';
+                calendarbtn.id = 'calendar-btn';
+                calendarbtn.innerText = 'Add to Calendar for future checkout';
+
+                
                 const paybutton = document.createElement("button");
                 paybutton.className = 'pay-button';
                 paybutton.id = 'absbtn';
@@ -939,7 +982,7 @@
                 order_details.appendChild(discount_container);
                 order_details.appendChild(final_container);
                 order_wrapper.appendChild(order_details);
-
+                order_wrapper.appendChild(calendarbtn);
                 
 
                 coupons_wrapper.onclick = (() => {
@@ -958,8 +1001,12 @@
                 overviewwrapper.appendChild(address_provided_wrapper);
                 overviewwrapper.appendChild(coupons_wrapper);
                 overviewwrapper.appendChild(order_wrapper);
+                
                 thisform2.appendChild(overviewwrapper);
                 thisform2.appendChild(paybutton);
+                
+                const button = document.querySelector('#calendar-btn')
+                button.addEventListener('click', () => atcb_action(config, button))
               
             }
 

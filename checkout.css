@@ -1041,3 +1041,61 @@ align-items: center;
     cursor: pointer;
     color: #001AFF;
 }
+
+.atcb_button_wrapper{
+
+width: 100% !important;
+box-shadow: none!important;
+
+}
+
+.atcb_button{
+
+
+      background-color: #FFFFFF !important;
+      border: 1px solid rgb(209,213,219) !important;
+      border-radius: .5rem !important;
+      box-sizing: border-box !important;
+      color: #111827 !important;
+      font-family: "Inter var",ui-sans-serif,system-ui,-apple-system,system-ui,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji" !important;
+      font-size: 10px!important;
+      font-weight: 600 !important;
+      line-height: 1.25rem !important;
+      padding: .75rem 1rem !important;
+      text-align: center !important;
+      text-decoration: none #D1D5DB solid;
+      text-decoration-thickness: auto;
+      box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 6px -1px, rgba(0, 0, 0, 0.06) 0px 2px 4px -1px !important;; 
+      cursor: pointer;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: manipulation;
+    min-width: 100%!important;
+    z-index: 0 !important;
+
+    
+    
+
+  
+   
+}
+
+
+.atcb_button:hover {
+  background-color: rgb(249,250,251) !important;
+}
+
+.atcb_button:focus {
+  outline: 2px solid transparent !important;
+  outline-offset: 2px !important;
+}
+
+.atcb_button:focus-visible {
+  box-shadow: none;
+}
+
+.btn-calendar{
+
+width: 100%;
+
+}
