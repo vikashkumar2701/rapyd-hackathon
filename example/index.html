@@ -5,6 +5,7 @@
     <title>Checkout Example</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" integrity="sha512-KfkfwYDsLkIlwQp6LFnl8zNdLGxu9YAA1QvwINks4PhcElQSvqcyVLLD9aMhXd13uQjoXtEKNosOWaZqXgel0g==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="https://cdn.jsdelivr.net/npm/add-to-calendar-button@1.8" defer></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/add-to-calendar-button@1.8/assets/css/atcb.min.css">
     <link rel="stylesheet" href="index.css">
 </head>
@@ -21,22 +22,7 @@
         </form>
     </div>
     <div id="rapyd-checkout"></div>
-    <div class="atcb" style="display:none;">
-        {
-          "name":"Reminder for the order",
-          "startDate":"2022-02-21",
-          "endDate":"2022-03-24",
-          "options":[
-            "Google",
-            "Apple",
-            "iCal",
-            "Microsoft365",
-            "MicrosoftTeams",
-            "Outlook.com",
-            "Yahoo"
-          ]
-        }
-      </div>
+ 
     <script type="text/javascript" src="../checkout.js"></script>
     <script src="https://sandboxcheckouttoolkit.rapyd.net"></script>
 
@@ -62,7 +48,7 @@
                     customer: {
                         name: form.children[1].value,
                         email: form.children[3].value,
-                        laura: [{"id":0,"count":3,"title":"Orange","img":"/images/fruit-1.jpeg","price":5.5},{"id":1,"count":2,"title":"Tangerine","img":"/images/fruit-2.jpeg","price":3},{"id":2,"count":1,"title":"Raspberry","img":"/images/fruit-3.jpeg","price":10}]
+                        laura: "[\r\n    {\r\n        \"id\": 0,\r\n        \"count\": 1,\r\n        \"title\": \"CHAIR\",\r\n        \"img\": \"/images/fruit-1.jpeg\",\r\n        \"price\": 100.5\r\n    },\r\n    {\r\n        \"id\": 1,\r\n        \"count\": 0,\r\n        \"title\": \"TABLE\",\r\n        \"img\": \"/images/fruit-2.jpeg\",\r\n        \"price\": 200\r\n    },\r\n    {\r\n        \"id\": 2,\r\n        \"count\": 0,\r\n        \"title\": \"BED\",\r\n        \"img\": \"/images/fruit-3.jpeg\",\r\n        \"price\": 500\r\n    }\r\n]"
                     },
                     themeColor: '#EC4899f'
                 });
