@@ -938,11 +938,16 @@
 
                 final_container.appendChild(finalprice);
                 final_container.appendChild(finalprice_value);
-                console.log(customerx.laura);
+                var ordersummary = "";
+                for(let i=0; i<customerx.laura.length; i++){
+                    ordersummary += customerx.laura[i].title + " x " + customerx.laura[i].count + " = " + customerx.laura[i].price + "<br>";
+                }
+                console.log(ordersummary);
+
                 const config = {
                     location:window.location.href,
                     name: "Reminder to complete your order",
-                    description: "Check out the maybe easiest way to include add-to-calendar-buttons to your website at:<br>→ [url]https://github.com/jekuer/add-to-calendar-button[/url]",
+                    description: ordersummary,
                     startDate: "2022-01-14",
                     endDate: "2022-01-18",
                     options: ["Apple",
