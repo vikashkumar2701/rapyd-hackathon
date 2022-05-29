@@ -1,0 +1,36 @@
+h1 {
+  color: green;
+}
+
+#container {
+  display: table;
+  margin: auto;
+  margin-top: 10px;
+}
+.parent {
+  box-shadow: rgba(136, 165, 191, 0.48) 6px 2px 16px 0px,
+    rgba(255, 255, 255, 0.8) -6px -2px 16px 0px;
+  width: min-content;
+}
+
+.success-header {
+  color: darkviolet;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.success-header img {
+  width: 400px;
+}
+
+.success-body {
+  text-align: center;
+  font-size: 20px;
+  font-weight: 600;
+  padding: 10px;
+  word-break: break-all;
+}
+
+td {
+  padding: 10px;
+}
